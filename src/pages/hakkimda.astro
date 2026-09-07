@@ -7,9 +7,9 @@ import { SITE } from '../consts.mjs';
 const zamanCizelgesi = [
   {
     yil: 'Bugün',
-    baslik: 'Şantiye muhasebesi + kendi araçlarımı yazmak',
+    baslik: 'Kendi araçlarımı yazmak',
     metin:
-      'Puantaj, bordro, SGK bildirimleri, cari hesaplar ve fatura kontrolü işimin merkezinde. Tekrar eden kontrolleri Python ile yaptığım küçük araçlara devrediyorum; kararı hâlâ ben veriyorum, kontrolü makine yapıyor.',
+      'Python ile veri kontrolü ve otomasyon araçları yazıyorum. Uygulama alanım şantiye muhasebesi: puantaj, bordro, SGK, cari hesap. Kararı insan veriyor, kontrolü makine yapıyor.',
   },
   {
     yil: '2024–2025',
@@ -32,7 +32,7 @@ const jsonLd = {
     '@type': 'Person',
     name: SITE.author,
     url: SITE.url,
-    jobTitle: 'Şantiye Muhasebesi',
+    jobTitle: 'Yazılım Geliştirici / Otomasyon',
     knowsAbout: ['Bordro', 'SGK', 'Puantaj', 'Python', 'React', 'Electron', 'Yerel LLM'],
     image: new URL(SITE.avatar, SITE.url).href,
     sameAs: [SITE.github, SITE.linkedin, SITE.instagram],
@@ -42,7 +42,7 @@ const jsonLd = {
 
 <BaseLayout
   baslik="Hakkımda"
-  aciklama="Şantiye muhasebesinden gelen, teknolojiyle gerçek iş problemlerini çözmeye çalışan biri. Ne yapıyorum, neyi neden öğreniyorum."
+  aciklama="Yazılım, otomasyon ve yerel yapay zekâ ile gerçek iş problemlerini çözmeye çalışan biri. Ne yapıyorum, neyi neden öğreniyorum."
   jsonLd={jsonLd}
 >
   <SayfaBasligi ustBaslik="Kim" baslik="Hakkımda" />
@@ -50,15 +50,22 @@ const jsonLd = {
   <div class="mx-auto max-w-6xl px-5 grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] items-start">
     <div class="yazi">
       <p>
-        Adım Abdullah, 2002 doğumluyum ve Türkiye'de yaşıyorum. Şantiye sektöründe muhasebe alanında
-        çalışıyorum: şantiye muhasebesi, personel işlemleri, maaş ve bordro süreçleri, SGK işlemleri,
-        cari hesaplar, fatura kontrolü ve ödeme takibi. İşin büyük bölümü Excel üzerinde dönüyor.
+        Adım Abdullah Eryetkin, 2002 doğumluyum ve Türkiye'de yaşıyorum. Yazılım, otomasyon ve
+        yerel yapay zekâ ile uğraşıyorum: Python, React, Vite, Electron ve kendi bilgisayarımda
+        çalışan modeller. Yaptığım şey, tekrar eden iş süreçlerini insan elinden alıp koda devretmek.
       </p>
 
       <p>
-        Ama kendimi yalnızca muhasebeci olarak tanımlamıyorum. Bir problemi çözmek kadar, o problemin
-        neden ortaya çıktığını ve arkasındaki sistemin nasıl çalıştığını anlamak da ilgimi çekiyor.
-        Bu yüzden zamanla işin tekrar eden kısmını yazılıma devretmeye başladım.
+        Bir problemi çözmek kadar, o problemin neden ortaya çıktığını ve arkasındaki sistemin nasıl
+        çalıştığını anlamak da ilgimi çekiyor. Hazır araçları kullanmakla yetinmek yerine gerektiğinde
+        kendi sistemimi kurabilmek istiyorum — bu yüzden bulut API'sine bağlı olmayan, uçtan uca
+        kendi makinemde çalışan çözümler üzerine çalışıyorum.
+      </p>
+
+      <p>
+        Çözdüğüm problemleri şantiye ve muhasebe tarafından tanıyorum; orada çalışıyorum ve
+        otomasyona olan ilgim oradan çıktı. Ama bu sitedeki iş <strong>yazılım</strong>: hangi
+        problemi hangi araçla çözdüğüm, ne ölçtüğüm ve neyi çözemediğim.
       </p>
 
       <h2>Neyle uğraşıyorum</h2>
@@ -80,10 +87,10 @@ const jsonLd = {
 
       <h2>Ne yapmak istiyorum</h2>
       <p>
-        Uzun vadede muhasebe ve şantiye tecrübemi teknoloji ve otomasyon bilgimle birleştirmek
-        istiyorum. Gerçek iş problemlerini yazılımla çözen sistemler kurmak — zaman kazandıran,
-        tekrar eden işi ortadan kaldıran, hatayı erken yakalayan araçlar. Benim için teknoloji merak
-        konusu olduğu kadar bir araç.
+        Gerçek iş problemlerini yazılımla çözen sistemler kurmak — zaman kazandıran, tekrar eden işi
+        ortadan kaldıran, hatayı erken yakalayan araçlar. Alan bilgisi burada avantaj: bir sürecin
+        içinde çalışmış olmak, o süreci otomatikleştirirken nerede patlayacağını önceden bilmeyi
+        sağlıyor. Benim için teknoloji merak konusu olduğu kadar bir araç.
       </p>
 
       <h2>Ne değilim</h2>
@@ -115,7 +122,7 @@ const jsonLd = {
 
       <div class="kutu p-5">
         <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
-          İş tarafı
+          Uygulama alanı
         </p>
         <ul class="flex flex-wrap gap-1.5">
           {
@@ -125,7 +132,7 @@ const jsonLd = {
           }
         </ul>
         <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mt-5 mb-3" style="color: var(--text-muted);">
-          Teknik taraf
+          Teknoloji
         </p>
         <ul class="flex flex-wrap gap-1.5">
           {

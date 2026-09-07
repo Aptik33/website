@@ -32,10 +32,11 @@ const jsonLd = {
   '@type': 'Person',
   name: SITE.author,
   url: SITE.url,
-  jobTitle: 'Şantiye Muhasebesi / Yazılım ve Otomasyon',
+  jobTitle: 'Yazılım Geliştirici / Otomasyon',
   knowsAbout: [
-    'Şantiye muhasebesi', 'Bordro ve SGK süreçleri', 'Python',
-    'React', 'Yerel yapay zekâ modelleri', 'Otomasyon',
+    'Python', 'Otomasyon', 'Yerel yapay zekâ modelleri', 'React', 'Electron',
+    // Uygulama alanı — teknik uzmanlık değil, problem alanı olarak.
+    'İş süreçleri otomasyonu', 'Bordro ve SGK süreçleri',
   ],
   email: `mailto:${SITE.email}`,
   image: new URL(SITE.avatar, SITE.url).href,
@@ -56,23 +57,24 @@ const jsonLd = {
       data-giris
     >
       <span class="relative flex w-2 h-2" aria-hidden="true">
-        <span class="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style="background: var(--kat-muhasebe);"></span>
-        <span class="relative inline-flex w-2 h-2 rounded-full" style="background: var(--kat-muhasebe);"></span>
+        <span class="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style="background: var(--kat-ai);"></span>
+        <span class="relative inline-flex w-2 h-2 rounded-full" style="background: var(--kat-ai);"></span>
       </span>
       <span class="font-[var(--font-mono)] text-xs" style="color: var(--text-muted);">
-        Şantiye muhasebesi · aktif olarak üretiyor
+        Yazılım · otomasyon · yerel yapay zekâ
       </span>
     </div>
 
-    <h1 id="giris-baslik" class="max-w-[19ch] sm:max-w-[22ch]" data-giris>
-      Şantiyede muhasebe tutuyorum, işin tekrar eden kısmını
+    <h1 id="giris-baslik" class="max-w-[19ch] sm:max-w-[20ch]" data-giris>
+      Tekrar eden iş süreçlerini
       <span class="gradyan-metin">yazılıma devrediyorum</span><span class="imlec" aria-hidden="true"></span>
     </h1>
 
     <p class="mt-7 max-w-2xl text-lg" style="color: var(--text-muted);" data-giris>
-      Puantaj, bordro, SGK ve cari hesap süreçlerinin içindeyim. Aynı zamanda Python ve kendi
-      bilgisayarımda çalışan yapay zekâ modelleriyle bu süreçleri hızlandıran araçlar yazıyorum.
-      Burada yaptığım işleri, <strong style="color: var(--text);">ölçtüğüm sonuçları</strong> ve
+      Python, Electron ve kendi bilgisayarımda çalışan yapay zekâ modelleriyle araçlar yazıyorum:
+      veri kontrolü, otomasyon, bulut bağımlılığı olmayan masaüstü uygulamaları. Çözdüğüm
+      problemleri şantiye ve muhasebe tarafından tanıyorum — asıl yaptığım iş yazılım.
+      Burada projeleri, <strong style="color: var(--text);">ölçtüğüm sonuçları</strong> ve
       <strong style="color: var(--text);">çözemediklerimi</strong> yazıyorum.
     </p>
 
@@ -194,11 +196,11 @@ const jsonLd = {
       >
       </div>
 
-      <h2 id="iletisim-baslik" class="max-w-[20ch] mx-auto">
-        Benzer bir süreci otomatikleştirmek mi istiyorsun?
+      <h2 id="iletisim-baslik" class="max-w-[22ch] mx-auto">
+        Tekrar eden bir işi yazılıma devretmek mi istiyorsun?
       </h2>
       <p class="mt-4 max-w-lg mx-auto" style="color: var(--text-muted);">
-        Muhasebe tarafındaki tekrar eden bir işi yazılıma devretmek üzerine konuşabiliriz.
+        Otomasyon, veri kontrolü veya yerel yapay zekâ tarafında bir fikrin varsa konuşabiliriz.
         Ya da sadece bir yazıdaki hatayı söylemek için yazabilirsin.
       </p>
       <a href="/iletisim" class="buton buton-birincil mt-8">
