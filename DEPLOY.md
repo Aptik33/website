@@ -197,3 +197,36 @@ git push                       # Cloudflare otomatik yayınlar
 ```
 
 Push'tan ~90 saniye sonra site canlıda.
+
+---
+
+## Cloudflare: statik mi, Worker mı? (önemli)
+
+Cloudflare, Astro projesini görünce otomatik olarak `@astrojs/cloudflare`
+adaptörünü ekleyip build'i **SSR (`mode: "server"`)** yapmaya çalışıyor.
+Bu sitede bu YANLIŞ ve build'i kırıyor:
+
+```
+__dirname is not defined
+at dist/_worker.js/chunks/canvaskit_*.mjs
+```
+
+Sebep: OG görsellerini üreten `canvaskit`, Node API'lerine ihtiyaç duyuyor;
+Workers çalışma zamanında bunlar yok.
+
+**Çözüm depoda var** — `wrangler.jsonc` dosyası yalnızca `assets` tanımlar,
+`main` tanımlamaz. Bu, "beni statik dağıt, Worker çalıştırma" demektir.
+`astro.config.mjs` içinde de `output: 'static'` ve `adapter: undefined`
+açıkça yazılıdır. Bu üçünü silme.
+
+### Yine de SSR'a zorlarsa
+
+Cloudflare build loglarında tekrar `adapter: @astrojs/cloudflare` görürsen,
+Workers yerine **Pages** projesi aç:
+
+1. Workers & Pages → **Create** → **Pages** sekmesi → **Connect to Git**
+2. `Aptik33/website` seç
+3. Framework preset: **Astro**, build command `npm run build`, output `dist`
+
+Pages statik hosting için adaptör kullanmaz; bu sorun orada hiç çıkmaz.
+Eski Worker projesini silebilirsin.
