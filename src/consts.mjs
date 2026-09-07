@@ -9,7 +9,7 @@ export const SITE = {
    */
   url:
     (typeof process !== 'undefined' && process.env?.PUBLIC_SITE_URL) ||
-    'https://website.abdullaheryetkin033.workers.dev',
+    'https://abdullaheryetkin.com.tr',
   name: 'Abdullah',
   title: 'Abdullah — Şantiye muhasebesi, otomasyon ve yerel yapay zekâ',
   description:
