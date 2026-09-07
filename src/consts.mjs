@@ -11,13 +11,13 @@ export const SITE = {
     (typeof process !== 'undefined' && process.env?.PUBLIC_SITE_URL) ||
     'https://website.abdullaheryetkin033.workers.dev',
   name: 'Abdullah',
-  title: 'Abdullah — Şantiye muhasebesi, otomasyon ve yerel yapay zekâ',
+  title: 'Abdullah Eryetkin — Yazılım, otomasyon ve yerel yapay zekâ',
   description:
-    'Şantiye muhasebesinde çalışıyorum; Python, React ve yerel yapay zekâ modelleriyle gerçek iş problemlerini çözen araçlar yazıyorum. Projeler, notlar ve indirilebilir dosyalar.',
+    'Python, React ve kendi bilgisayarımda çalışan yapay zekâ modelleriyle iş süreçlerini otomatikleştiren araçlar yazıyorum. Projeler, ölçüme dayalı notlar ve indirilebilir kaynaklar.',
   author: 'Abdullah Eryetkin',
   // Üst bardaki marka kısa kalıyor, kimlik geçen yerlerde tam ad kullanılıyor.
   tamAd: 'Abdullah Eryetkin',
-  unvan: 'Şantiye Muhasebesi · Otomasyon & Yerel Yapay Zekâ',
+  unvan: 'Yazılım & Otomasyon · Yerel Yapay Zekâ',
   konum: 'Türkiye',
   locale: 'tr-TR',
   email: 'abdullaheryetkin033@gmail.com',
