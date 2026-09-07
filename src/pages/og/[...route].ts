@@ -10,6 +10,9 @@ import { OGImageRoute } from 'astro-og-canvas';
  * önbelleklenir; ikinci build'de yeniden üretilmezler.
  */
 
+/** Build zamanında üretilir; asla istek anında çalıştırılmaz. */
+export const prerender = true;
+
 const yazilar = await getCollection('yazilar', ({ data }) => !data.taslak);
 const projeler = await getCollection('projeler');
 const kaynaklar = await getCollection('kaynaklar');

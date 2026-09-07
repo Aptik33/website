@@ -1,0 +1,30 @@
+/**
+ * Cloudflare dağıtım yapılandırması — STATİK varlık sunumu.
+ *
+ * Bu site tamamen statiktir: sunucu, SSR, API rotası ve veritabanı yok.
+ * `main` alanı bilinçli olarak TANIMSIZ; yalnızca `assets` var. Bu sayede
+ * `wrangler deploy` dist/ klasörünü statik dosya olarak yükler, Worker
+ * çalıştırmaz.
+ *
+ * NEDEN BU DOSYA VAR: Cloudflare, Astro projesini otomatik algılayıp
+ * `@astrojs/cloudflare` adaptörünü ekliyor ve build'i `mode: "server"`
+ * yapıyordu. O modda astro-og-canvas'ın kullandığı canvaskit, Workers
+ * çalışma zamanında Node API'lerini (__dirname, fs) bulamayıp build'i
+ * kırıyordu. Bu dosya niyeti açıkça bildirir: statik, adaptör yok.
+ */
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "website",
+  "compatibility_date": "2026-09-07",
+
+  "assets": {
+    "directory": "./dist",
+
+    // build.format: 'file' kullanıyoruz (blog.html gibi).
+    // Bu ayar /blog isteğini blog.html dosyasına eşler.
+    "html_handling": "auto-trailing-slash",
+
+    // Bulunamayan yollar dist/404.html sayfasını 404 koduyla döndürür.
+    "not_found_handling": "404-page"
+  }
+}
