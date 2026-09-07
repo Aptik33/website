@@ -283,3 +283,68 @@ PUBLIC_SITE_URL = https://eryetkin.is-a.dev
 Sonra son deploy'u **Retry** et. Canonical, og:image, sitemap ve RSS
 kendiliğinden yeni adrese döner. `public/robots.txt` içindeki sitemap satırını
 da elle güncelle.
+
+---
+
+## Domain bağlama: abdullaheryetkin.com.tr (Turhost → Cloudflare)
+
+Domain Turhost'tan alındı. DNS yönetimi Cloudflare'e taşınacak; Turhost'ta
+hosting satın alınmadı ve gerekmiyor.
+
+### Adım 1 — Domaini Cloudflare'e ekle
+
+1. https://dash.cloudflare.com → giriş yap
+2. Ana sayfada **+ Add** / **Add a domain** butonu (sol menüde **Domains** de olur)
+3. `abdullaheryetkin.com.tr` yaz
+4. Plan seçiminde **Free** ($0) seç — ücretli plana gerek yok
+5. Cloudflare mevcut kayıtları taramaya çalışır, boş çıkması normal → **Continue**
+
+Sonunda sana **iki ad sunucusu** verir, şuna benzer:
+
+```
+alice.ns.cloudflare.com
+bob.ns.cloudflare.com
+```
+
+Bu ikisi her hesapta farklıdır. Kopyala.
+
+### Adım 2 — Turhost'ta ad sunucularını değiştir
+
+1. https://panel.turhost.com → giriş
+2. **Alan Adlarım / Domainlerim** → `abdullaheryetkin.com.tr`
+3. **Ad Sunucuları** (Nameserver / DNS Yönetimi) bölümü
+4. Varsayılan Turhost NS'lerini sil, Cloudflare'in verdiği ikisini yaz
+5. Kaydet
+
+> `.tr` uzantılarda bu değişiklik TRABIS üzerinden gider; **birkaç saat**
+> sürebilir, bazen 24 saati bulur. Panelde "beklemede" görünmesi normaldir.
+
+### Adım 3 — Yayılmayı bekle
+
+Cloudflare panelinde domain **Active** olarak görünene kadar bekle.
+E-posta ile de haber verir.
+
+### Adım 4 — Domaini siteye bağla
+
+Domain Active olduktan sonra:
+
+1. Cloudflare → **Workers & Pages** → `website` → **Domains** (veya Settings →
+   Domains & Routes)
+2. **Add** → **Custom domain**
+3. `abdullaheryetkin.com.tr` ve `www.abdullaheryetkin.com.tr` ekle
+
+Cloudflare SSL sertifikasını otomatik alır, ücretsizdir.
+
+### Adım 5 — Site adresini güncelle
+
+Cloudflare → Worker → **Settings → Variables and Secrets** → ekle:
+
+```
+PUBLIC_SITE_URL = https://abdullaheryetkin.com.tr
+```
+
+Sonra **Deployments → Retry deployment**. Canonical, og:image, sitemap ve RSS
+otomatik olarak yeni adrese döner.
+
+Son olarak `public/robots.txt` içindeki sitemap satırını yeni adrese güncelle
+ve push et.
