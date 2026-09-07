@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout baslik="Sayfa bulunamadı" aciklama="Aradığın sayfa taşınmış veya hiç var olmamış olabilir." noIndex>
+  <div class="mx-auto max-w-6xl px-5 py-28 text-center">
+    <p class="font-[var(--font-mono)] text-6xl mb-6" style="color: var(--accent);">404</p>
+    <h1>Bu sayfa yok</h1>
+    <p class="mt-4 max-w-md mx-auto" style="color: var(--text-muted);">
+      Bağlantı eski olabilir ya da adres yanlış yazılmış olabilir. Aşağıdan devam edebilirsin.
+    </p>
+    <div class="mt-8 flex flex-wrap gap-3 justify-center">
+      <a href="/" class="buton buton-birincil">Anasayfa</a>
+      <a href="/blog" class="buton buton-ikincil">Blog</a>
+      <a href="/projeler" class="buton buton-ikincil">Projeler</a>
+    </div>
+  </div>
+</BaseLayout>

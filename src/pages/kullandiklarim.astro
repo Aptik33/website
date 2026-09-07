@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+
+const bolumler = [
+  {
+    baslik: 'İş masası',
+    aciklama: 'Muhasebe işinin fiilen üzerinde döndüğü araçlar.',
+    ogeler: [
+      { ad: 'Microsoft Excel', not: 'Ana çalışma ortamı. Formül, pivot, koşullu biçimlendirme.' },
+      { ad: 'Python + pandas', not: 'Excel formülüyle güvenli yapılamayan çapraz kontroller.' },
+      { ad: 'openpyxl', not: 'Biçimi bozmadan xlsx okuma/yazma.' },
+      { ad: 'PDF birleştirme/ayırma scriptleri', not: 'Evrak dosyalarını aylık klasörlemek için.' },
+    ],
+  },
+  {
+    baslik: 'Geliştirme',
+    aciklama: 'Kod yazarken açık duran şeyler.',
+    ogeler: [
+      { ad: 'VS Code', not: 'Python, Astro ve React eklentileriyle.' },
+      { ad: 'Node.js + Vite', not: 'Ön yüz tarafındaki her şey.' },
+      { ad: 'Electron', not: 'Masaüstü uygulama paketlemesi.' },
+      { ad: 'Git', not: 'Bu sitenin içeriği de dahil her şey repoda.' },
+    ],
+  },
+  {
+    baslik: 'Yerel yapay zekâ',
+    aciklama: 'İnternet bağlantısı olmadan çalışan kurulum.',
+    ogeler: [
+      { ad: 'Ollama', not: 'Model çalıştırma ve Modelfile ile davranış ayarı.' },
+      { ad: 'GGUF / Q4_K_M nicelemesi', not: 'VRAM sınırında kalite–hız dengesi.' },
+      { ad: 'JSON şema doğrulaması', not: 'Model çıktısını uygulamaya sokmadan önce filtre.' },
+    ],
+  },
+  {
+    baslik: 'Oyun ve donanım',
+    aciklama: 'Boş vaktin geçtiği yer; aynı zamanda performans denemelerinin sahası.',
+    ogeler: [
+      { ad: 'Red Dead Redemption 2', not: 'Grafik ayarı kurcalamak için en iyi test sahası.' },
+      { ad: 'PUBG Mobile (emülatör)', not: 'Kare hızı ve girdi gecikmesi optimizasyonu.' },
+      { ad: 'MSI Afterburner + RTSS', not: 'Frametime ölçümü, %1 low takibi.' },
+      { ad: 'HWiNFO64', not: 'Sıcaklık ve güç limiti takibi.' },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  baslik="Kullandıklarım"
+  aciklama="Günlük işte, kod yazarken, yerel yapay zekâ çalışırken ve oyunda kullandığım donanım ve yazılımların güncel listesi."
+>
+  <SayfaBasligi
+    ustBaslik="/uses"
+    baslik="Kullandıklarım"
+    aciklama="Reklam ya da öneri listesi değil; fiilen kullandığım şeyler. Değiştikçe güncelliyorum."
+  />
+
+  <div class="mx-auto max-w-6xl px-5 grid gap-6 md:grid-cols-2">
+    {
+      bolumler.map((b) => (
+        <section class="kutu p-5">
+          <h2 class="text-lg">{b.baslik}</h2>
+          <p class="text-sm mt-1 mb-4" style="color: var(--text-muted);">{b.aciklama}</p>
+          <ul class="space-y-3">
+            {b.ogeler.map((o) => (
+              <li class="border-t pt-3 first:border-t-0 first:pt-0" style="border-color: var(--border);">
+                <p class="font-[var(--font-mono)] text-sm">{o.ad}</p>
+                <p class="text-sm mt-0.5" style="color: var(--text-muted);">{o.not}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>

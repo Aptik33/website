@@ -1,0 +1,142 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import ProfilKarti from '../components/ProfilKarti.astro';
+import { SITE } from '../consts.mjs';
+
+const zamanCizelgesi = [
+  {
+    yil: 'Bugün',
+    baslik: 'Şantiye muhasebesi + kendi araçlarımı yazmak',
+    metin:
+      'Puantaj, bordro, SGK bildirimleri, cari hesaplar ve fatura kontrolü işimin merkezinde. Tekrar eden kontrolleri Python ile yaptığım küçük araçlara devrediyorum; kararı hâlâ ben veriyorum, kontrolü makine yapıyor.',
+  },
+  {
+    yil: '2024–2025',
+    baslik: 'Yerel yapay zekâ ve masaüstü uygulama',
+    metin:
+      'Ollama ile kendi bilgisayarımda çalışan modeller, Electron + React ile masaüstü arayüz, şema doğrulamalı JSON çıktı ve prompt tasarımı üzerine çalıştım. Bulut API bağımlılığı olmadan uçtan uca çalışan bir sistem kurmayı öğrendim.',
+  },
+  {
+    yil: 'Öncesi',
+    baslik: 'Excel ve süreçler',
+    metin:
+      'İşin büyük kısmı Excel üzerinde dönüyordu. Formüller yetmediği noktada tabloları veri olarak görmeye, hesaplamayı tablodan ayırmaya başladım. Otomasyona olan ilgim buradan çıktı.',
+  },
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  mainEntity: {
+    '@type': 'Person',
+    name: SITE.author,
+    url: SITE.url,
+    jobTitle: 'Şantiye Muhasebesi',
+    knowsAbout: ['Bordro', 'SGK', 'Puantaj', 'Python', 'React', 'Electron', 'Yerel LLM'],
+    image: new URL(SITE.avatar, SITE.url).href,
+    sameAs: [SITE.github, SITE.linkedin, SITE.instagram],
+  },
+};
+---
+
+<BaseLayout
+  baslik="Hakkımda"
+  aciklama="Şantiye muhasebesinden gelen, teknolojiyle gerçek iş problemlerini çözmeye çalışan biri. Ne yapıyorum, neyi neden öğreniyorum."
+  jsonLd={jsonLd}
+>
+  <SayfaBasligi ustBaslik="Kim" baslik="Hakkımda" />
+
+  <div class="mx-auto max-w-6xl px-5 grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] items-start">
+    <div class="yazi">
+      <p>
+        Adım Abdullah, 2002 doğumluyum ve Türkiye'de yaşıyorum. Şantiye sektöründe muhasebe alanında
+        çalışıyorum: şantiye muhasebesi, personel işlemleri, maaş ve bordro süreçleri, SGK işlemleri,
+        cari hesaplar, fatura kontrolü ve ödeme takibi. İşin büyük bölümü Excel üzerinde dönüyor.
+      </p>
+
+      <p>
+        Ama kendimi yalnızca muhasebeci olarak tanımlamıyorum. Bir problemi çözmek kadar, o problemin
+        neden ortaya çıktığını ve arkasındaki sistemin nasıl çalıştığını anlamak da ilgimi çekiyor.
+        Bu yüzden zamanla işin tekrar eden kısmını yazılıma devretmeye başladım.
+      </p>
+
+      <h2>Neyle uğraşıyorum</h2>
+      <p>
+        Python, React, Vite, Electron ve Ollama ile yerel çalışan yapay zekâ modelleri üzerine
+        projeler geliştiriyorum. Amacım hazır yapay zekâ araçlarını kullanmakla sınırlı değil;
+        gerektiğinde kendi sistemimi kurabilmek. Bir görüntüyü yerel bir modelden geçirip şemaya uyan
+        JSON çıktı almak, çıktının tutarsızlığını prompt ve doğrulama katmanıyla sınırlamak, tüm
+        veriyi cihazda tutmak — bunlar üzerine çalıştığım konular.
+      </p>
+
+      <h2>Nasıl öğreniyorum</h2>
+      <p>
+        Teorik okumaktan çok deneyerek, karşılaştırarak ve gerçek bir proje üzerinde uygulayarak
+        öğreniyorum. Bir cevabın doğru olması bana yetmiyor; neden doğru olduğunun açıklanması ve
+        mümkünse alternatiflerle karşılaştırılması gerekiyor. Bu siteyi de aynı mantıkla yazıyorum:
+        her yazıda ölçüm, karşılaştırma veya en azından gerekçe olsun istiyorum.
+      </p>
+
+      <h2>Ne yapmak istiyorum</h2>
+      <p>
+        Uzun vadede muhasebe ve şantiye tecrübemi teknoloji ve otomasyon bilgimle birleştirmek
+        istiyorum. Gerçek iş problemlerini yazılımla çözen sistemler kurmak — zaman kazandıran,
+        tekrar eden işi ortadan kaldıran, hatayı erken yakalayan araçlar. Benim için teknoloji merak
+        konusu olduğu kadar bir araç.
+      </p>
+
+      <h2>Ne değilim</h2>
+      <p>
+        Yapay zekâ uzmanı ya da profesyonel yazılımcı değilim. Öğrenme aşamasındayım ve burada
+        yazdıklarım da o aşamanın kayıtları. Bu yüzden her proje sayfasında{' '}
+        <strong>"neyi çözemedim"</strong> başlığı var — çünkü bir aracın sınırlarını bilmeden onu
+        kullanmak, bilerek kullanmaktan daha risklidir.
+      </p>
+    </div>
+
+    <aside class="space-y-4 lg:sticky lg:top-24">
+      <ProfilKarti duzen="dar" />
+
+      <div class="kutu p-5">
+        <p class="mono-etiket mb-3">Yol</p>
+        <ol class="space-y-5">
+          {
+            zamanCizelgesi.map((z) => (
+              <li>
+                <p class="font-[var(--font-mono)] text-xs" style="color: var(--accent);">{z.yil}</p>
+                <p class="font-medium text-sm mt-1">{z.baslik}</p>
+                <p class="text-sm mt-1" style="color: var(--text-muted);">{z.metin}</p>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="kutu p-5">
+        <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
+          İş tarafı
+        </p>
+        <ul class="flex flex-wrap gap-1.5">
+          {
+            ['Bordro', 'SGK', 'Puantaj', 'Cari hesap', 'Fatura kontrolü', 'Excel'].map((s) => (
+              <li class="etiket">{s}</li>
+            ))
+          }
+        </ul>
+        <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mt-5 mb-3" style="color: var(--text-muted);">
+          Teknik taraf
+        </p>
+        <ul class="flex flex-wrap gap-1.5">
+          {
+            ['Python', 'pandas', 'React', 'Vite', 'Electron', 'Ollama', 'Yerel LLM', 'Astro'].map((s) => (
+              <li class="etiket">{s}</li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <a href="/iletisim" class="buton buton-birincil w-full">İletişime geç</a>
+    </aside>
+  </div>
+</BaseLayout>

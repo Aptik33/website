@@ -1,0 +1,152 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import KategoriRozet from '../../components/KategoriRozet.astro';
+import { SITE } from '../../consts.mjs';
+import type { CollectionEntry } from 'astro:content';
+import { tarihTR, boyutFormat } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const kaynaklar = await getCollection('kaynaklar');
+  return kaynaklar.map((kaynak) => ({ params: { slug: kaynak.id }, props: { kaynak } }));
+}
+
+const { kaynak } = Astro.props;
+const d = kaynak.data;
+const { Content } = await render(kaynak);
+
+const yazi = await getEntry(d.ilgiliYazi);
+const indirmeYolu = '/indir/' + d.dosyaAdi;
+
+type Gunluk = CollectionEntry<'kaynaklar'>['data']['degisiklikGunlugu'][number];
+const gunluk = [...d.degisiklikGunlugu].sort(
+  (a: Gunluk, b: Gunluk) => b.tarih.valueOf() - a.tarih.valueOf()
+);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'DataDownload',
+  name: d.baslik,
+  description: d.aciklama,
+  contentUrl: new URL(indirmeYolu, SITE.url).href,
+  contentSize: String(d.dosyaBoyutu),
+  encodingFormat: d.formatlar.join(', '),
+  version: d.surum,
+  license: 'https://opensource.org/licenses/MIT',
+  datePublished: d.yayinTarihi.toISOString(),
+  author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+};
+---
+
+<BaseLayout baslik={d.baslik} aciklama={d.aciklama} tur="article" jsonLd={jsonLd} ogYol={`/og/kaynaklar/${kaynak.id}.png`}>
+  <article class="mx-auto max-w-6xl px-5 pt-12">
+    <nav class="font-[var(--font-mono)] text-xs mb-6" style="color: var(--text-muted);" aria-label="Konum">
+      <a href="/kaynaklar" class="hover:text-[var(--accent)]">kaynaklar</a> / <span>{kaynak.id}</span>
+    </nav>
+
+    {/* Başlık ızgaranın dışında: mobilde okuma sırası başlık → indirme → içerik olsun. */}
+    <header class="max-w-3xl mb-10">
+      <div class="flex flex-wrap items-center gap-2 mb-5" data-reveal>
+        <KategoriRozet kategori={d.kategori} />
+        <span class="etiket">v{d.surum}</span>
+        <span class="etiket">{d.lisans}</span>
+      </div>
+      <h1 data-reveal>{d.baslik}</h1>
+      <p class="mt-5 text-lg" style="color: var(--text-muted);" data-reveal>{d.aciklama}</p>
+    </header>
+
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-14 items-start">
+      <div>
+        <div class="yazi" data-pagefind-body>
+          <Content />
+        </div>
+
+        {/* Değişiklik günlüğü */}
+        <section class="mt-14 max-w-3xl">
+          <h2 class="text-xl mb-4">Değişiklik günlüğü</h2>
+          <ol class="space-y-3">
+            {gunluk.map((g: Gunluk) => (
+              <li class="kutu p-4 flex gap-4">
+                <span class="font-[var(--font-mono)] text-sm shrink-0" style="color: var(--accent);">v{g.surum}</span>
+                <div>
+                  <p class="text-sm">{g.not}</p>
+                  <p class="font-[var(--font-mono)] text-xs mt-1" style="color: var(--text-muted);">
+                    <time datetime={g.tarih.toISOString()}>{tarihTR(g.tarih)}</time>
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+
+      {/* İndirme paneli */}
+      <aside class="lg:sticky lg:top-24 space-y-4 order-first lg:order-none">
+        <div class="kutu p-5" style="border-color: color-mix(in srgb, var(--accent) 35%, transparent);">
+          <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--accent);">
+            İndir
+          </p>
+
+          <a href={indirmeYolu} download class="buton buton-birincil w-full">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 19h16" />
+            </svg>
+            {d.dosyaAdi}
+          </a>
+
+          <dl class="mt-4 space-y-2 text-xs font-[var(--font-mono)]">
+            <div class="flex justify-between gap-3">
+              <dt style="color: var(--text-muted);">Boyut</dt>
+              <dd>{boyutFormat(d.dosyaBoyutu)}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt style="color: var(--text-muted);">Sürüm</dt>
+              <dd>{d.surum}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt style="color: var(--text-muted);">Biçim</dt>
+              <dd>{d.formatlar.join(' · ')}</dd>
+            </div>
+            <div class="flex justify-between gap-3">
+              <dt style="color: var(--text-muted);">Lisans</dt>
+              <dd>{d.lisans}</dd>
+            </div>
+          </dl>
+
+          <div class="mt-4 pt-4 border-t" style="border-color: var(--border);">
+            <p class="text-xs mb-1" style="color: var(--text-muted);">SHA-256</p>
+            <code class="block text-[0.65rem] leading-relaxed break-all" style="color: var(--text-muted);">
+              {d.sha256}
+            </code>
+          </div>
+        </div>
+
+        {d.gereksinimler.length > 0 && (
+          <div class="kutu p-5">
+            <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
+              Gereksinimler
+            </p>
+            <ul class="space-y-1.5 text-sm">
+              {d.gereksinimler.map((g) => (
+                <li class="flex gap-2">
+                  <span style="color: var(--accent);" aria-hidden="true">›</span>
+                  <span>{g}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {yazi && (
+          <div class="kutu p-5">
+            <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+              Önce bunu oku
+            </p>
+            <a href={'/blog/' + yazi.id} class="font-medium hover:text-[var(--accent)]">{yazi.data.baslik}</a>
+            <p class="text-sm mt-2" style="color: var(--text-muted);">{yazi.data.ozet}</p>
+          </div>
+        )}
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

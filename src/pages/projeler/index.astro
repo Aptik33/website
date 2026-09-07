@@ -1,0 +1,71 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SayfaBasligi from '../../components/SayfaBasligi.astro';
+import ProjeKart from '../../components/ProjeKart.astro';
+import { KATEGORILER } from '../../consts.mjs';
+
+const projeler = (await getCollection('projeler')).sort(
+  (a, b) => b.data.tarih.valueOf() - a.data.tarih.valueOf()
+);
+
+const kullanilan = [...new Set(projeler.map((p) => p.data.kategori))];
+---
+
+<BaseLayout
+  baslik="Projeler"
+  aciklama="Şantiye muhasebesi, otomasyon ve yerel yapay zekâ üzerine geliştirdiğim araçlar; her biri problem, yaklaşım, sonuç ve sınırlarıyla."
+>
+  <SayfaBasligi
+    ustBaslik="Vaka çalışmaları"
+    baslik="Projeler"
+    aciklama="Her proje sayfasında dört soruyu cevaplıyorum: hangi problem, neden bu yaklaşım, ne sonuç verdi ve neyi çözemedim."
+  />
+
+  <div class="mx-auto max-w-6xl px-5">
+    <div class="flex flex-wrap gap-2 mb-8" role="group" aria-label="Kategoriye göre filtrele">
+      <button type="button" class="etiket filtre" data-kat="hepsi" aria-pressed="true">Hepsi</button>
+      {
+        kullanilan.map((k) => (
+          <button type="button" class="etiket filtre" data-kat={k} aria-pressed="false">
+            {KATEGORILER[k as keyof typeof KATEGORILER].ad}
+          </button>
+        ))
+      }
+    </div>
+
+    <div id="proje-liste" class="grid gap-4 md:grid-cols-2">
+      {
+        projeler.map((p) => (
+          <div data-kat={p.data.kategori}>
+            <ProjeKart proje={p} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .filtre { cursor: pointer; }
+  .filtre[aria-pressed='true'] {
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: var(--accent-soft);
+  }
+</style>
+
+<script>
+  const butonlar = document.querySelectorAll<HTMLButtonElement>('.filtre');
+  const kartlar = document.querySelectorAll<HTMLElement>('#proje-liste > [data-kat]');
+
+  butonlar.forEach((b) =>
+    b.addEventListener('click', () => {
+      const secili = b.dataset.kat;
+      butonlar.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      kartlar.forEach((k) => {
+        k.hidden = secili !== 'hepsi' && k.dataset.kat !== secili;
+      });
+    })
+  );
+</script>

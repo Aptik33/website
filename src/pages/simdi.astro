@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import { tarihTR } from '../lib/utils';
+
+// Bu sayfayı ayda bir güncelle. Tarihi de birlikte güncellemeyi unutma.
+const guncelleme = new Date('2026-09-01');
+
+const bloklar = [
+  {
+    baslik: 'Üzerinde çalıştığım',
+    maddeler: [
+      'Puantaj–bordro çapraz kontrol aracını tek şantiyeden çok şantiyeli yapıya taşımak.',
+      'Bu siteyi kurmak ve ilk yazıları yayımlamak.',
+    ],
+  },
+  {
+    baslik: 'Öğrendiğim',
+    maddeler: [
+      'Yerel modellerde niceleme seviyesinin (Q4/Q6/Q8) çıktı kalitesine etkisini ölçmek.',
+      'pandas ile büyük Excel dosyalarında bellek dostu okuma.',
+    ],
+  },
+  {
+    baslik: 'Ertelediğim',
+    maddeler: [
+      'Kendi RAG kurulumum — şu an ihtiyaç net değil, gerekçesi oluşmadan başlamayacağım.',
+      'Mobil uygulama tarafı.',
+    ],
+  },
+];
+---
+
+<BaseLayout
+  baslik="Şu an"
+  aciklama="Şu anda ne üzerinde çalışıyorum, ne öğreniyorum ve neyi bilerek ertelemiş durumdayım."
+>
+  <SayfaBasligi
+    ustBaslik="/now"
+    baslik="Şu an"
+    aciklama="Bu sayfa ayda bir güncellenir. Amacı hedef listesi vermek değil, o an gerçekten neyle uğraştığımı kaydetmek."
+  />
+
+  <div class="mx-auto max-w-6xl px-5">
+    <p class="font-[var(--font-mono)] text-xs mb-8" style="color: var(--text-muted);">
+      Son güncelleme: <time datetime={guncelleme.toISOString()}>{tarihTR(guncelleme)}</time>
+    </p>
+
+    <div class="grid gap-4 md:grid-cols-3">
+      {
+        bloklar.map((b) => (
+          <section class="kutu p-5">
+            <h2 class="text-base font-[var(--font-mono)]" style="color: var(--accent);">{b.baslik}</h2>
+            <ul class="mt-3 space-y-2.5">
+              {b.maddeler.map((m) => (
+                <li class="text-sm flex gap-2">
+                  <span style="color: var(--text-muted);" aria-hidden="true">›</span>
+                  <span>{m}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,280 @@
+---
+/**
+ * Sayfa geneli hareket katmanı — Motion (Framer Motion) ile.
+ *
+ * `motion` paketi, framer-motion'ın React'siz giriş noktasıdır; aynı ekip,
+ * aynı kod tabanı. `motion/react` zaten framer-motion'ın kendisidir. Burada
+ * React kurmadan gerçek yay (spring) fiziğini ve scroll-linked animasyonları
+ * kullanabilmek için vanilla API tercih edildi.
+ *
+ * Yaptıkları:
+ *  1. Okuma ilerleme çubuğu   — scroll() ile scroll'a bağlı
+ *  2. Arka plan paralaksı     — ışık küreleri scroll ile farklı hızda kayar
+ *  3. Giriş animasyonu        — hero elemanları stagger ile sırayla girer
+ *  4. Scroll reveal           — inView + spring
+ *  5. Sayaç animasyonu        — proje metriklerindeki sayılar sayarak artar
+ *  6. Kart hover              — hover() + spring ile yükselme
+ *  7. Spotlight               — imleci takip eden ışık (CSS değişkeni)
+ *
+ * Hepsi progressive enhancement: script çalışmazsa veya kullanıcı
+ * prefers-reduced-motion diyorsa sayfa tamamen okunabilir kalır.
+ */
+---
+
+<div id="ilerleme" aria-hidden="true"></div>
+
+<div class="zemin-izgara" aria-hidden="true"></div>
+<div class="zemin-isik" aria-hidden="true">
+  <div class="isik-kure isik-kure-1"></div>
+  <div class="isik-kure isik-kure-2"></div>
+</div>
+<div class="zemin-parazit" aria-hidden="true"></div>
+
+<style>
+  #ilerleme {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 50;
+    transform-origin: 0% 50%;
+    transform: scaleX(0);
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  import { animate, hover, inView, scroll, stagger } from 'motion';
+
+  // Güvenlik ağını devre dışı bırak: Motion yüklendi, animasyonları biz yöneteceğiz.
+  document.documentElement.classList.add('motion-hazir');
+
+  const azHareket = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Motion'ın paylaşılan yay ayarları — sitenin "hareket dili". */
+  const YAY = { type: 'spring', stiffness: 220, damping: 28, mass: 0.9 } as const;
+  const YAY_YUMUSAK = { type: 'spring', stiffness: 120, damping: 22 } as const;
+  /* Hafif overshoot — GSAP'ın back.out(1.4) eğrisinin yay karşılığı. */
+  const YAY_GERI = { type: 'spring', stiffness: 260, damping: 18, mass: 0.8 } as const;
+
+  /* ════════ 1. Okuma ilerleme çubuğu ════════ */
+  const cubuk = document.getElementById('ilerleme');
+  if (cubuk && !azHareket) {
+    scroll(animate(cubuk, { scaleX: [0, 1] }, { ease: 'linear' }));
+  }
+
+  /* ════════ 2. Arka plan paralaksı ════════ */
+  if (!azHareket) {
+    const kure1 = document.querySelector<HTMLElement>('.isik-kure-1');
+    const kure2 = document.querySelector<HTMLElement>('.isik-kure-2');
+
+    // Küreler scroll ile ters yönde ve farklı hızda kayar; derinlik hissi verir.
+    if (kure1) scroll(animate(kure1, { y: [0, 220], scale: [1, 1.25] }, { ease: 'linear' }));
+    if (kure2) scroll(animate(kure2, { y: [0, -140], scale: [1.1, 0.9] }, { ease: 'linear' }));
+
+    // Izgara çok az kayar — sabit dursa "yapışık" görünüyor.
+    const izgara = document.querySelector<HTMLElement>('.zemin-izgara');
+    if (izgara) scroll(animate(izgara, { y: [0, 60] }, { ease: 'linear' }));
+  }
+
+  /* ════════ 3. Giriş animasyonu (hero) ════════ */
+  const girisOgeleri = document.querySelectorAll<HTMLElement>('[data-giris]');
+  if (girisOgeleri.length > 0) {
+    if (azHareket) {
+      girisOgeleri.forEach((el) => (el.style.opacity = '1'));
+    } else {
+      animate(
+        girisOgeleri,
+        { opacity: [0, 1], y: [24, 0], filter: ['blur(6px)', 'blur(0px)'] },
+        { delay: stagger(0.08), duration: 0.7, ease: [0.16, 1, 0.3, 1] }
+      );
+    }
+  }
+
+  /* ════════ 4. Scroll reveal ════════ */
+  const revealOgeleri = document.querySelectorAll<HTMLElement>('[data-reveal]');
+
+  if (azHareket) {
+    revealOgeleri.forEach((el) => {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  } else {
+    // Aynı kap içindeki kardeşler gruplanır ki stagger anlamlı olsun.
+    const gruplar = new Map<Element, HTMLElement[]>();
+    revealOgeleri.forEach((el) => {
+      const kap = el.parentElement ?? document.body;
+      if (!gruplar.has(kap)) gruplar.set(kap, []);
+      gruplar.get(kap)!.push(el);
+    });
+
+    for (const [, ogeler] of gruplar) {
+      ogeler.forEach((oge, i) => {
+        inView(
+          oge,
+          (hedef) => {
+            /**
+             * ui-ux-pro-max skill'inin "Stagger List" önerisi:
+             * opacity + scale 0.92→1 + y, hafif overshoot (back.out hissi),
+             * stagger 0.06. Overshoot burada spring'in damping'i ile veriliyor.
+             */
+            animate(
+              hedef,
+              { opacity: [0, 1], y: [18, 0], scale: [0.965, 1] },
+              { ...YAY_GERI, delay: Math.min(i, 5) * 0.06 }
+            );
+            return () => {}; // tek seferlik: çıkışta bir şey yapma
+          },
+          { amount: 0.15, margin: '0px 0px -10% 0px' }
+        );
+      });
+    }
+  }
+
+  /* ════════ 5. Sayaç animasyonu ════════ */
+  // Yalnızca tamamen sayısal metrikler sayılır ("9 kural" → 9, "2–3 sa" → atlanır).
+  const sayaclar = document.querySelectorAll<HTMLElement>('[data-sayac]');
+  sayaclar.forEach((el) => {
+    const hedefDeger = Number(el.dataset.sayac);
+    if (!Number.isFinite(hedefDeger) || azHareket) return;
+
+    const sonek = el.dataset.sayacSonek ?? '';
+    inView(
+      el,
+      () => {
+        animate(0, hedefDeger, {
+          duration: 1.1,
+          ease: [0.16, 1, 0.3, 1],
+          onUpdate: (v) => {
+            el.textContent = Math.round(v).toLocaleString('tr-TR') + sonek;
+          },
+        });
+        return () => {};
+      },
+      { amount: 0.6 }
+    );
+  });
+
+  /* ════════ 6 + 7. Kart hover ve spotlight ════════ */
+  const inceIsaretci = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (inceIsaretci) {
+    const kartlar = document.querySelectorAll<HTMLElement>('.kart-spot');
+
+    // Motion'ın hover() yardımcısı: giriş/çıkış tek yerde, spring ile.
+    if (!azHareket) {
+      hover(kartlar, (el) => {
+        animate(el, { y: -5, scale: 1.008 }, YAY);
+        return () => animate(el, { y: 0, scale: 1 }, YAY_YUMUSAK);
+      });
+    }
+
+    // Spotlight konumu: rAF ile sınırlandırılmış, boyama tamamen CSS'te.
+    let bekleyen = false;
+    let son: { el: HTMLElement; x: number; y: number } | null = null;
+
+    document.addEventListener(
+      'pointermove',
+      (e) => {
+        const kart = (e.target as HTMLElement)?.closest<HTMLElement>('.kart-spot');
+        if (!kart) return;
+        const k = kart.getBoundingClientRect();
+        son = { el: kart, x: e.clientX - k.left, y: e.clientY - k.top };
+
+        if (bekleyen) return;
+        bekleyen = true;
+        requestAnimationFrame(() => {
+          bekleyen = false;
+          if (!son) return;
+          son.el.style.setProperty('--mx', son.x + 'px');
+          son.el.style.setProperty('--my', son.y + 'px');
+        });
+      },
+      { passive: true }
+    );
+  }
+
+  /* ════════ 8. Terminal — satır satır yazılma ════════ */
+  const terminal = document.querySelector<HTMLElement>('[data-terminal]');
+  if (terminal) {
+    const satirlar = terminal.querySelectorAll<HTMLElement>('[data-terminal-satir]');
+    const imlec = terminal.querySelector<HTMLElement>('[data-terminal-imlec]');
+
+    if (azHareket) {
+      satirlar.forEach((el) => (el.style.opacity = '1'));
+      if (imlec) imlec.style.opacity = '1';
+    } else {
+      satirlar.forEach((el) => (el.style.opacity = '0'));
+      if (imlec) imlec.style.opacity = '0';
+
+      inView(
+        terminal,
+        () => {
+          // Komut satırı biraz bekler, sonra çıktı hızla akar — gerçek
+          // bir script çalışmasının ritmi.
+          satirlar.forEach((el, i) => {
+            const gecikme = i === 0 ? 0.25 : 0.75 + (i - 1) * 0.09;
+            animate(el, { opacity: [0, 1], x: [-6, 0] }, { duration: 0.24, delay: gecikme });
+          });
+
+          if (imlec) {
+            const toplam = 0.75 + satirlar.length * 0.09;
+            animate(imlec, { opacity: [0, 1] }, { duration: 0.1, delay: toplam });
+            animate(imlec, { opacity: [1, 0] }, {
+              duration: 1.1,
+              delay: toplam,
+              repeat: Infinity,
+              repeatType: 'reverse',
+            });
+          }
+          return () => {};
+        },
+        // Terminal, kısa viewport'larda (yatay telefon) ekrandan uzun olabilir;
+        // 0.3 hiç sağlanmayıp animasyon tetiklenmeyebilirdi.
+        { amount: 0.15 }
+      );
+    }
+  }
+
+  /* ════════ 9. Bölüm numaralarında çözülme efekti ════════ */
+  // 21st.dev "Decrypt Text" / "HyperText" kalıbı: rastgele karakterler
+  // hedef metne oturur. Sadece kısa mono etiketlerde kullanılır.
+  const KARAKTERLER = '01234567890ABCDEF#$%&*/<>';
+  document.querySelectorAll<HTMLElement>('[data-coz]').forEach((el) => {
+    const hedefMetin = el.textContent ?? '';
+    if (azHareket || hedefMetin.length > 12) return;
+
+    inView(
+      el,
+      () => {
+        let adim = 0;
+        const toplamAdim = hedefMetin.length * 4;
+        const zamanlayici = setInterval(() => {
+          el.textContent = hedefMetin
+            .split('')
+            .map((k, i) =>
+              i < adim / 4 ? k : KARAKTERLER[Math.floor(Math.random() * KARAKTERLER.length)]
+            )
+            .join('');
+          if (++adim > toplamAdim) {
+            clearInterval(zamanlayici);
+            el.textContent = hedefMetin;
+          }
+        }, 35);
+        return () => clearInterval(zamanlayici);
+      },
+      { amount: 0.9 }
+    );
+  });
+
+  /* ════════ Buton basma geri bildirimi ════════ */
+  if (!azHareket) {
+    const butonlar = document.querySelectorAll<HTMLElement>('.buton');
+    hover(butonlar, (el) => {
+      animate(el, { scale: 1.02 }, YAY);
+      return () => animate(el, { scale: 1 }, YAY_YUMUSAK);
+    });
+  }
+</script>

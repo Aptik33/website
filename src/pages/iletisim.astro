@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SayfaBasligi from '../components/SayfaBasligi.astro';
+import { SITE } from '../consts.mjs';
+
+/**
+ * Web3Forms anahtarı ortam değişkeninden gelir.
+ * Kök dizinde .env dosyası oluştur:  PUBLIC_WEB3FORMS_KEY=xxxx
+ * Anahtar yoksa form gönderim yerine bir uyarı gösterir; sessizce
+ * çalışmayan bir form canlıya çıkmasın diye böyle.
+ */
+const formAnahtari = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+const formHazir = Boolean(formAnahtari);
+
+if (!formHazir) {
+  console.warn(
+    '[iletisim] PUBLIC_WEB3FORMS_KEY tanımlı değil — iletişim formu devre dışı, e-posta bağlantısı gösteriliyor.'
+  );
+}
+---
+
+<BaseLayout
+  baslik="İletişim"
+  aciklama="Proje, iş birliği veya soru için doğrudan yazabilirsin. Form arka uç gerektirmez, mesaj doğrudan e-postama düşer."
+>
+  <SayfaBasligi
+    ustBaslik="Yaz"
+    baslik="İletişim"
+    aciklama="Bir soru, bir düzeltme ya da birlikte yapılabilecek bir iş varsa yaz. Genelde birkaç gün içinde dönüyorum."
+  />
+
+  <div class="mx-auto max-w-6xl px-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] items-start">
+    {!formHazir && (
+      <div class="kutu p-6" role="note" aria-label="Form devre dışı">
+        <p class="mono-etiket mb-3" style="color: var(--accent);">Form henüz bağlı değil</p>
+        <p class="text-sm" style="color: var(--text-muted);">
+          Bu form <code>PUBLIC_WEB3FORMS_KEY</code> ortam değişkeni tanımlanınca çalışır.
+          O zamana kadar doğrudan e-posta yazabilirsin:
+        </p>
+        <a href={'mailto:' + SITE.email} class="buton buton-birincil mt-5">{SITE.email}</a>
+      </div>
+    )}
+
+    <form
+      action="https://api.web3forms.com/submit"
+      method="POST"
+      class="kutu p-6 space-y-5"
+      hidden={!formHazir}
+    >
+      <input type="hidden" name="access_key" value={formAnahtari} />
+      <input type="hidden" name="subject" value="Siteden yeni mesaj" />
+      <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" />
+
+      <div>
+        <label for="ad" class="block text-sm mb-1.5">Ad</label>
+        <input
+          id="ad"
+          name="ad"
+          type="text"
+          required
+          maxlength="80"
+          class="w-full px-3 py-2 rounded-[var(--radius-buton)] border bg-transparent"
+          style="border-color: var(--border); background: var(--bg);"
+        />
+      </div>
+
+      <div>
+        <label for="eposta" class="block text-sm mb-1.5">E-posta</label>
+        <input
+          id="eposta"
+          name="email"
+          type="email"
+          required
+          class="w-full px-3 py-2 rounded-[var(--radius-buton)] border bg-transparent"
+          style="border-color: var(--border); background: var(--bg);"
+        />
+      </div>
+
+      <div>
+        <label for="mesaj" class="block text-sm mb-1.5">Mesaj</label>
+        <textarea
+          id="mesaj"
+          name="mesaj"
+          rows="6"
+          required
+          maxlength="2000"
+          class="w-full px-3 py-2 rounded-[var(--radius-buton)] border bg-transparent resize-y"
+          style="border-color: var(--border); background: var(--bg);"></textarea>
+      </div>
+
+      <p class="text-xs" style="color: var(--text-muted);">
+        Formu gönderdiğinde adın, e-postan ve mesajın bana iletilir. Başka bir yerde saklanmaz,
+        pazarlama amacıyla kullanılmaz.
+      </p>
+
+      <button type="submit" class="buton buton-birincil">Gönder</button>
+    </form>
+
+    <aside class="space-y-4">
+      <div class="kutu p-5">
+        <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
+          Doğrudan
+        </p>
+        <ul class="space-y-2 text-sm">
+          <li><a href={'mailto:' + SITE.email} class="baglanti break-all">{SITE.email}</a></li>
+          <li><a href={SITE.github} rel="me noopener" class="baglanti">GitHub</a></li>
+          <li><a href={SITE.linkedin} rel="me noopener" class="baglanti">LinkedIn</a></li>
+        </ul>
+      </div>
+
+      <div class="kutu p-5">
+        <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-2" style="color: var(--text-muted);">
+          Şunlara cevap veremem
+        </p>
+        <p class="text-sm" style="color: var(--text-muted);">
+          Somut olaya özel mali müşavirlik, vergi veya hukuk danışmanlığı. Bunlar için yetkili bir
+          mali müşavire başvurman gerekir. Süreç ve otomasyon tarafındaki sorularda yardımcı olabilirim.
+        </p>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

@@ -1,0 +1,132 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import KategoriRozet from '../../components/KategoriRozet.astro';
+import { SITE } from '../../consts.mjs';
+import { tarihTR, boyutFormat, DURUM_ETIKET, sayacBilgisi } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const projeler = await getCollection('projeler');
+  return projeler.map((proje) => ({ params: { slug: proje.id }, props: { proje } }));
+}
+
+const { proje } = Astro.props;
+const d = proje.data;
+const { Content } = await render(proje);
+
+// getEntry, referans çözülemezse undefined dönebilir; filter(Boolean) ile eleniyor.
+const kaynaklar = (
+  await Promise.all(d.ilgiliKaynaklar.map((r) => getEntry(r)))
+).filter(Boolean) as CollectionEntry<'kaynaklar'>[];
+
+const yazilar = (
+  await Promise.all(d.ilgiliYazilar.map((r) => getEntry(r)))
+).filter(Boolean) as CollectionEntry<'yazilar'>[];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareSourceCode',
+  name: d.baslik,
+  description: d.ozet,
+  programmingLanguage: d.stack,
+  codeRepository: d.repoUrl,
+  dateCreated: d.tarih.toISOString(),
+  author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+};
+---
+
+<BaseLayout baslik={d.baslik} aciklama={d.ozet} tur="article" jsonLd={jsonLd} ogYol={`/og/projeler/${proje.id}.png`}>
+  <article class="mx-auto max-w-6xl px-5 pt-12">
+    <nav class="font-[var(--font-mono)] text-xs mb-6" style="color: var(--text-muted);" aria-label="Konum">
+      <a href="/projeler" class="hover:text-[var(--accent)]">projeler</a> / <span>{proje.id}</span>
+    </nav>
+
+    <header class="max-w-3xl">
+      <div class="flex flex-wrap items-center gap-2 mb-5">
+        <KategoriRozet kategori={d.kategori} />
+        <span class="etiket">{DURUM_ETIKET[d.durum]}</span>
+        <span class="etiket"><time datetime={d.tarih.toISOString()}>{tarihTR(d.tarih)}</time></span>
+      </div>
+
+      <h1>{d.baslik}</h1>
+      <p class="mt-5 text-lg" style="color: var(--text-muted);">{d.ozet}</p>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        {d.repoUrl && <a href={d.repoUrl} rel="noopener" class="buton buton-birincil text-sm">Kaynak kodu</a>}
+        {d.demoUrl && <a href={d.demoUrl} rel="noopener" class="buton buton-ikincil text-sm">Demo</a>}
+      </div>
+    </header>
+
+    {d.metrikler.length > 0 && (
+      <dl class="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {d.metrikler.map((m) => {
+          const sayac = sayacBilgisi(m.deger);
+          return (
+            <div class="kutu kart-spot p-4" data-reveal>
+              <dt class="mono-etiket text-[0.625rem]">{m.etiket}</dt>
+              <dd
+                class="font-[var(--font-baslik)] text-2xl mt-1 tabular-nums"
+                style="color: var(--accent);"
+                data-sayac={sayac ? String(sayac.sayi) : undefined}
+                data-sayac-sonek={sayac ? sayac.sonek : undefined}
+              >
+                {m.deger}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    )}
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-14 items-start">
+      <div class="yazi" data-pagefind-body>
+        <Content />
+      </div>
+
+      <aside class="lg:sticky lg:top-24 space-y-4">
+        <div class="kutu p-4">
+          <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
+            Kullanılan teknolojiler
+          </p>
+          <ul class="flex flex-wrap gap-1.5">
+            {d.stack.map((s) => <li class="etiket">{s}</li>)}
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    {/* Zorunlu bölüm: neyi çözemedim */}
+    <section class="mt-14 max-w-3xl">
+      <div class="kutu p-5" style="border-color: color-mix(in srgb, var(--kat-donanim) 30%, var(--border));">
+        <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-2" style="color: var(--kat-donanim);">
+          Sınırlar ve çözemediklerim
+        </p>
+        <p class="text-sm leading-relaxed" style="color: var(--text-muted);">{d.sinirlar}</p>
+      </div>
+    </section>
+
+    {(kaynaklar.length > 0 || yazilar.length > 0) && (
+      <section class="mt-14">
+        <h2 class="text-xl mb-5">Bu projeyle ilgili</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {yazilar.map((y) => (
+            <a href={'/blog/' + y.id} class="kutu kutu-hover p-4 block">
+              <p class="font-[var(--font-mono)] text-xs mb-2" style="color: var(--text-muted);">Yazı</p>
+              <p class="font-medium">{y.data.baslik}</p>
+            </a>
+          ))}
+          {kaynaklar.map((k) => (
+            <a href={'/kaynaklar/' + k.id} class="kutu kutu-hover p-4 block">
+              <p class="font-[var(--font-mono)] text-xs mb-2" style="color: var(--accent);">Dosya</p>
+              <p class="font-medium">{k.data.baslik}</p>
+              <p class="font-[var(--font-mono)] text-xs mt-1" style="color: var(--text-muted);">
+                {k.data.dosyaAdi} · {boyutFormat(k.data.dosyaBoyutu)}
+              </p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>

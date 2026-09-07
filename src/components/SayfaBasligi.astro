@@ -1,0 +1,28 @@
+---
+interface Props {
+  baslik: string;
+  aciklama?: string;
+  ustBaslik?: string;
+}
+
+const { baslik, aciklama, ustBaslik } = Astro.props;
+---
+
+<div class="mx-auto max-w-6xl px-5 pt-20 pb-12">
+  {
+    ustBaslik && (
+      <p class="mono-etiket mb-4 flex items-center gap-3" data-reveal>
+        <span class="h-px w-6" style="background: var(--accent);" aria-hidden="true" />
+        <span style="color: var(--accent);">{ustBaslik}</span>
+      </p>
+    )
+  }
+  <h1 data-reveal style="--gecikme: 60ms">{baslik}</h1>
+  {
+    aciklama && (
+      <p class="mt-5 max-w-2xl text-lg" style="color: var(--text-muted);" data-reveal>
+        {aciklama}
+      </p>
+    )
+  }
+</div>

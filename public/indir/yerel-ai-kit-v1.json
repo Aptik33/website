@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "ad": "Yerel AI Başlangıç Paketi",
+  "surum": "1.0.0",
+  "lisans": "MIT",
+  "aciklama": "Ollama ile kendi bilgisayarında model çalıştırırken kullandığım Modelfile şablonları, JSON çıktı zorlayan sistem promptları ve donanıma göre model seçim tablosu. Hiçbiri sihirli ayar değil; her birinin neden öyle olduğu 'not' alanında yazıyor.",
+  "guncelleme": "2026-09-01",
+
+  "donanim_secim_tablosu": {
+    "aciklama": "VRAM, modelin sığıp sığmadığını belirleyen tek kritik değer. Model tamamen VRAM'e sığmazsa katmanlar RAM'e taşar ve hız 5-10 kat düşer. Aşağıdaki değerler Q4_K_M nicelemesi ve 4096 bağlam için geçerlidir.",
+    "seviyeler": [
+      {
+        "vram_gb": 6,
+        "onerilen_parametre": "3B - 4B",
+        "ornek_modeller": ["llama3.2:3b", "qwen2.5:3b", "gemma2:2b"],
+        "beklenen_hiz_token_sn": "35 - 60",
+        "not": "Kısa özetleme, sınıflandırma ve basit yeniden yazma için yeterli. Uzun akıl yürütme isteme."
+      },
+      {
+        "vram_gb": 8,
+        "onerilen_parametre": "7B - 8B",
+        "ornek_modeller": ["llama3.1:8b", "qwen2.5:7b", "mistral:7b"],
+        "beklenen_hiz_token_sn": "25 - 45",
+        "not": "Günlük kullanım için tatlı nokta. 8 GB'ta bağlamı 8192'nin üzerine çıkarırsan taşma riski var."
+      },
+      {
+        "vram_gb": 12,
+        "onerilen_parametre": "8B (Q8) veya 14B (Q4)",
+        "ornek_modeller": ["qwen2.5:14b", "llama3.1:8b-instruct-q8_0"],
+        "beklenen_hiz_token_sn": "18 - 35",
+        "not": "Burada seçim yapman gerekir: aynı modelin daha az kayıplı hali mi, daha büyük ama daha sıkıştırılmış model mi. Yapılandırılmış çıktı istiyorsan Q8'i tercih et."
+      },
+      {
+        "vram_gb": 16,
+        "onerilen_parametre": "14B - 24B",
+        "ornek_modeller": ["qwen2.5:14b-instruct-q6_K", "mistral-small"],
+        "beklenen_hiz_token_sn": "12 - 25",
+        "not": "Görsel dil modelleri (VLM) için de rahat alan açılır."
+      }
+    ],
+    "niceleme_notu": "Q4_K_M çoğu durumda doğru varsayılandır. Q8 kaliteyi ölçülebilir biçimde artırır ama bellek ihtiyacını yaklaşık iki katına çıkarır. Q3 ve altına inmek, yapılandırılmış çıktı üreten görevlerde format bozulmasına yol açar; tavsiye etmiyorum."
+  },
+
+  "modelfile_sablonlari": [
+    {
+      "ad": "json-cikti",
+      "amac": "Modeli serbest metin yerine yalnızca geçerli JSON üretmeye zorlar.",
+      "icerik": "FROM llama3.1:8b\n\nPARAMETER temperature 0.1\nPARAMETER top_p 0.9\nPARAMETER num_ctx 8192\nPARAMETER repeat_penalty 1.05\n\nSYSTEM \"\"\"\nSen bir veri çıkarma modülüsün. Kullanıcıyla sohbet etmezsin.\n\nKurallar:\n1. Yanıtın YALNIZCA tek bir JSON nesnesidir. Öncesinde veya sonrasında hiçbir metin, açıklama veya kod bloğu işareti olmaz.\n2. Şemada olmayan alan uydurmazsın.\n3. Bir bilgiden emin değilsen o alana null yazarsın. Tahmin yürütmezsin.\n4. Metin alanlarını Türkçe yazarsın.\n\"\"\"\n",
+      "not": "temperature 0.1 tercih edilmesinin sebebi yaratıcılık değil tekrarlanabilirlik. Aynı girdiye aynı çıktıyı vermesi, çıktıyı programla işleyeceğin durumda şart. 0 yerine 0.1 kullanıyorum çünkü bazı modeller 0'da döngüye giriyor."
+    },
+    {
+      "ad": "gorsel-analiz",
+      "amac": "Görsel dil modeliyle bir görüntüyü betimletmek, ama abartılı yorum yaptırmamak.",
+      "icerik": "FROM llava:7b\n\nPARAMETER temperature 0.2\nPARAMETER num_ctx 4096\n\nSYSTEM \"\"\"\nGörüntüde GÖRDÜĞÜN şeyleri betimlersin. Görmediğin şeyi yazmazsın.\n\nKurallar:\n1. Belirsiz olan her şey için \"belirsiz\" dersin.\n2. Duygu, niyet veya gelecek çıkarımı yapmazsın.\n3. Betimlemeni en fazla 5 madde ile sınırlarsın.\n\"\"\"\n",
+      "not": "Görsel modellerin en büyük sorunu görmediğini uydurması. Sistem promptunda 'görmediğini yazma' demek bunu tamamen çözmez ama ölçülebilir biçimde azaltır. Yine de çıktıyı doğrulaman gerekir."
+    },
+    {
+      "ad": "turkce-ozet",
+      "amac": "Uzun Türkçe metni sabit uzunlukta özetlemek.",
+      "icerik": "FROM qwen2.5:7b\n\nPARAMETER temperature 0.3\nPARAMETER num_ctx 16384\n\nSYSTEM \"\"\"\nTürkçe metinleri özetlersin.\n\nKurallar:\n1. Özet en fazla 5 cümledir.\n2. Metinde geçmeyen bilgi eklemezsin.\n3. Sayı, tarih ve tutarları aynen korursun.\n4. Yorum yapmazsın, sadece özetlersin.\n\"\"\"\n",
+      "not": "Türkçe için Qwen ailesi, aynı boyuttaki Llama'dan gözle görülür biçimde daha tutarlı sonuç veriyor. num_ctx'i 16384'e çıkarmak uzun belgeler için gerekli ama VRAM tüketimini artırır."
+    }
+  ],
+
+  "sistem_prompt_desenleri": [
+    {
+      "ad": "sema-zorlama",
+      "aciklama": "Modelden JSON isterken şemayı prompt içinde göstermek, sadece 'JSON ver' demekten belirgin biçimde daha güvenilir.",
+      "sablon": "Aşağıdaki metni analiz et ve TAM OLARAK bu şemada JSON döndür:\n\n{\n  \"konu\": \"string\",\n  \"tutar\": number | null,\n  \"tarih\": \"YYYY-AA-GG\" | null,\n  \"guven\": 0.0 - 1.0\n}\n\nMetin:\n---\n{{METIN}}\n---",
+      "not": "Yine de çıktıyı uygulama tarafında doğrulamak zorundasın. Prompt bir güvence değil, olasılığı artıran bir önlemdir."
+    },
+    {
+      "ad": "bilmiyorum-izni",
+      "aciklama": "Modele açıkça 'bilmiyorum diyebilirsin' izni vermek, uydurma oranını düşüren en ucuz müdahale.",
+      "sablon": "Sorunun cevabını verilen bağlamda bulamıyorsan yalnızca şunu yaz: BILGI_YOK\nTahmin yürütme, genel bilgiden cevap üretme.\n\nBağlam:\n{{BAGLAM}}\n\nSoru: {{SORU}}",
+      "not": "Ölçtüğüm kadarıyla en belirgin kazanç bu desende. Modelin uydurma eğilimi tamamen bitmiyor ama 'boş dönebilirim' seçeneği olduğunda belirgin şekilde azalıyor."
+    },
+    {
+      "ad": "tek-gorev",
+      "aciklama": "Bir prompta birden fazla iş yüklemek küçük modellerde kaliteyi düşürür.",
+      "sablon": "Tek bir iş yap: {{GOREV}}\nBaşka hiçbir şey yapma. Yorum ekleme, öneri verme, özet çıkarma.",
+      "not": "7B ve altındaki modellerde 'hem özetle hem sınıflandır hem de öneri ver' dediğinde üçünü de ortalama yapıyor. İki ayrı çağrı, tek karmaşık çağrıdan daha iyi sonuç veriyor ve genelde daha da hızlı."
+    }
+  ],
+
+  "kurulum_adimlari": [
+    "Ollama'yı kur: https://ollama.com/download",
+    "Bir model indir: ollama pull llama3.1:8b",
+    "Bu paketteki bir Modelfile içeriğini Modelfile adlı dosyaya kaydet.",
+    "Kendi modelini oluştur: ollama create json-cikti -f Modelfile",
+    "Dene: ollama run json-cikti",
+    "API olarak kullan: POST http://localhost:11434/api/generate"
+  ],
+
+  "olcum_notu": "Buradaki hız değerleri kendi makinemde, tek kullanıcı ve boş bağlam ile ölçüldü. Senin sonucun donanıma, sürücü sürümüne, arka planda çalışan uygulamalara ve bağlam uzunluğuna göre değişir. Bir ayarı benimsemeden önce kendi makinende ölç.",
+
+  "uyari": "Bu dosyadaki hiçbir ayar 'en iyi ayar' değildir. Her biri belirli bir denemenin sonucudur ve gerekçesi 'not' alanında yazılıdır. Gerekçeyi okumadan kopyalarsan, bir şey bozulduğunda neden bozulduğunu bilemezsin."
+}

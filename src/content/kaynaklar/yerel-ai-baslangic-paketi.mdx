@@ -1,0 +1,86 @@
+---
+baslik: "Yerel AI Başlangıç Paketi"
+aciklama: "Ollama ile kendi bilgisayarında model çalıştırmak için Modelfile şablonları, JSON çıktı zorlayan sistem promptları ve VRAM'e göre model seçim tablosu — her ayarın gerekçesiyle."
+kategori: "ai"
+dosyaAdi: "yerel-ai-kit-v1.json"
+dosyaBoyutu: 7287
+formatlar: ["json"]
+surum: "1.0.0"
+sha256: "f8cba80b3e3277b10218b87ad46b24d7c96c80f32b3d2ec2694915b3cb876b10"
+lisans: "MIT"
+gereksinimler:
+  - "Ollama (Windows, macOS veya Linux)"
+  - "En az 6 GB VRAM'e sahip bir GPU (8 GB önerilir)"
+  - "Disk üzerinde model başına 4–9 GB boş alan"
+yayinTarihi: 2026-08-31
+ilgiliYazi: "yerel-llm-vram-hiz-kalite-takasi"
+degisiklikGunlugu:
+  - surum: "1.0.0"
+    tarih: 2026-08-31
+    not: "İlk yayın. Üç Modelfile şablonu, üç sistem prompt deseni ve dört seviyeli donanım tablosu."
+---
+
+## İçinde ne var
+
+Tek bir JSON dosyası. Kopyala-yapıştır ayar listesi değil — her maddenin yanında
+`not` alanı var ve o notta ayarın **neden** öyle olduğu yazıyor. Gerekçeyi
+okumadan kopyalarsan, bir şey bozulduğunda neden bozulduğunu bilemezsin.
+
+### 1. Donanım seçim tablosu
+
+VRAM, modelin sığıp sığmadığını belirleyen tek kritik değer. Model tamamen VRAM'e
+sığmazsa katmanlar sistem belleğine taşar ve hız 5–10 kat düşer. Tablo 6, 8, 12 ve
+16 GB için önerilen parametre boyutunu, örnek modelleri ve beklenen token/saniye
+aralığını veriyor.
+
+### 2. Üç Modelfile şablonu
+
+| şablon | ne için |
+|---|---|
+| `json-cikti` | Modeli serbest metin yerine yalnızca geçerli JSON üretmeye zorlar |
+| `gorsel-analiz` | Görsel dil modeline "görmediğini yazma" kuralını dayatır |
+| `turkce-ozet` | Uzun Türkçe metni sabit uzunlukta, yorum katmadan özetler |
+
+### 3. Üç sistem prompt deseni
+
+`sema-zorlama`, `bilmiyorum-izni` ve `tek-gorev`. Üçü de aynı problemi farklı
+açıdan çözüyor: küçük modeller belirsizlik karşısında susmak yerine uyduruyor.
+
+## Nasıl kullanılır
+
+```bash
+# 1. Model indir
+ollama pull llama3.1:8b
+
+# 2. JSON'daki modelfile_sablonlari[0].icerik alanını Modelfile adlı dosyaya kaydet
+
+# 3. Kendi modelini oluştur
+ollama create json-cikti -f Modelfile
+
+# 4. Dene
+ollama run json-cikti
+```
+
+Uygulamadan çağırmak istersen `POST http://localhost:11434/api/generate`.
+
+## En işe yarayan tek şey
+
+Paketteki bütün desenler içinde ölçülebilir farkı en net olan `bilmiyorum-izni`:
+
+```
+Sorunun cevabını verilen bağlamda bulamıyorsan yalnızca şunu yaz: BILGI_YOK
+Tahmin yürütme, genel bilgiden cevap üretme.
+```
+
+Modele boş dönme izni vermek, uydurma eğilimini bitirmiyor ama belirgin biçimde
+azaltıyor. Bir cümlelik müdahale için iyi bir getiri.
+
+## Sınırlar
+
+- Buradaki hız değerleri **kendi makinemde**, tek kullanıcı ve boş bağlamla
+  ölçüldü. Senin sonucun donanıma, sürücü sürümüne ve bağlam uzunluğuna göre değişir.
+- Prompt bir güvence değil, olasılığı artıran bir önlem. Model JSON üretsin diye
+  ne yazarsan yaz, çıktıyı uygulama tarafında **doğrulamak zorundasın**.
+- Model isimleri ve sürümleri zamanla eskiyecek. Tablodaki mantık kalıcı, model
+  listesi değil.
+- Hiçbir ayar "en iyi ayar" değil. Her biri belirli bir denemenin sonucu.

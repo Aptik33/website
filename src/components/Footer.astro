@@ -1,0 +1,87 @@
+---
+import { SITE, SOSYAL } from '../consts.mjs';
+import SosyalIkon from './SosyalIkon.astro';
+
+const yil = new Date().getFullYear();
+
+/** Dış linkler: yeni sekme + noopener noreferrer, tutarlı politika. */
+const disLinkler = SOSYAL.filter((s) => !s.href.startsWith('mailto:'));
+
+const icLinkler = [
+  { ad: 'Şu an', href: '/simdi' },
+  { ad: 'Kullandıklarım', href: '/kullandiklarim' },
+  { ad: 'İletişim', href: '/iletisim' },
+  { ad: 'RSS', href: '/rss.xml' },
+];
+---
+
+<footer class="relative mt-20 border-t" style="border-color: var(--border);">
+  <div
+    class="absolute inset-x-0 top-0 h-px"
+    style="background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 45%, transparent), transparent);"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="mx-auto max-w-6xl px-5 py-12 flex flex-col sm:flex-row gap-8 sm:items-start sm:justify-between">
+    <div>
+      <div class="flex items-center gap-2.5">
+        <span
+          class="grid place-items-center w-6 h-6 rounded font-[var(--font-mono)] text-xs font-bold"
+          style="background: var(--accent); color: var(--accent-contrast);"
+          aria-hidden="true">A</span
+        >
+        <p class="font-[var(--font-baslik)] font-semibold">{SITE.name}</p>
+      </div>
+      <p class="text-sm mt-3 max-w-xs" style="color: var(--text-muted);">
+        Şantiye muhasebesi, otomasyon ve yerel yapay zekâ üzerine notlar.
+      </p>
+    </div>
+
+    <div class="flex gap-12">
+      <nav aria-label="Alt menü">
+        <p class="mono-etiket mb-3">Site</p>
+        <ul class="space-y-2 text-sm">
+          {
+            icLinkler.map((l) => (
+              <li>
+                <a href={l.href} class="transition-colors hover:text-[var(--accent)]" style="color: var(--text-muted);">
+                  {l.ad}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-label="Dış bağlantılar">
+        <p class="mono-etiket mb-3">Bağlantı</p>
+        <ul class="space-y-2 text-sm">
+          {
+            disLinkler.map((l) => (
+              <li>
+                <a
+                  href={l.href}
+                  target="_blank"
+                  rel="me noopener noreferrer"
+                  class="inline-flex items-center gap-2 transition-colors hover:text-[var(--accent)]"
+                  style="color: var(--text-muted);"
+                >
+                  <SosyalIkon ad={l.ad} boyut={14} />
+                  {l.ad}
+                  <span class="sr-only">(yeni sekmede açılır)</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div class="mx-auto max-w-6xl px-5 pb-10">
+    <p class="font-[var(--font-mono)] text-xs" style="color: var(--text-soluk);">
+      © {yil} {SITE.name} · İçerik CC BY 4.0, kod ve kaynak dosyaları MIT.
+    </p>
+  </div>
+</footer>

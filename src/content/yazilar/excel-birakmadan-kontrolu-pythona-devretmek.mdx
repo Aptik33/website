@@ -1,0 +1,111 @@
+---
+baslik: "Excel'i Bırakmadım, Kontrolü Python'a Devrettim"
+ozet: "Şantiye muhasebesinde tam otomasyona neden gitmediğimi ve bunun yerine hangi işi makineye devrettiğimi anlatıyorum. Otomasyonun getirisinin maliyetini aştığı yer, sanıldığından çok daha dar."
+yayinTarihi: 2026-08-24
+kategori: "muhasebe"
+etiketler: ["Excel", "Python", "Bordro", "Otomasyon", "Süreç"]
+kaynakDosya: "puantaj-kontrol-paketi"
+---
+
+Şantiye muhasebesinde çalışan herkesin bir noktada duyduğu cümle: "bunların hepsi
+otomatik olsun." Kulağa mantıklı geliyor. Puantaj giriliyor, bordro çıkıyor, SGK
+bildirimi hazırlanıyor, ödeme yapılıyor — hepsi tekrar eden iş. Neden makine yapmasın?
+
+Bir süre ben de bunu denedim. Vardığım sonuç şu: **bu işin tekrar eden kısmı
+sanıldığı kadar büyük değil, değişken kısmı ise sanıldığından çok daha büyük.**
+
+## Otomasyonun kırıldığı yer
+
+Bir işi otomatikleştirebilmen için o işin kurallarının sabit olması gerekir.
+Şantiye muhasebesinde kurallar üç ayrı yerden bozuluyor:
+
+**Mevzuat değişiyor.** Asgari ücret, SGK tavanı, teşvik oranları, vergi dilimleri.
+Bunların bir kısmı yılda bir, bir kısmı yıl içinde değişiyor. Hesaplamayı koda
+gömdüğün gün, o kodun bakım sorumluluğunu da almış oluyorsun. Ve yanlış hesaplanan
+bir bordronun sonucu, kaybedilen zaman değil; ceza.
+
+**Tablolar standart değil.** Her şantiyeden gelen puantaj aynı biçimde gelmiyor.
+Kimi ay sütun ekleniyor, kimi ay birleştirilmiş hücre çıkıyor, kimi ay bir usta
+"açıklama" diye alt satıra not düşüyor. Bu tabloları güvenle okuyan bir parser
+yazmak, işin kendisinden uzun sürüyor.
+
+**Kararın bir kısmı zaten insanın.** Ay içinde işe giren personelin kıst ücreti,
+avans mahsubu, iş kazası nedeniyle raporlu geçen gün — bunlar hesaplanabilir ama
+hangisinin uygulanacağına bakan bir insan olmak zorunda. Otomasyon, kararı değil
+en fazla hesabı devralabilir.
+
+> Bir işi otomatikleştirmenin maliyeti, o işi bir kez yapmanın maliyeti değil;
+> kuralları değiştiğinde otomasyonu güncellemenin sürekli maliyetidir.
+
+## Peki ne devrettim
+
+Hesaplamayı değil, **kontrolü**.
+
+Bordro çıktıktan sonra yaptığım iş aslında hesaplamak değil, karşılaştırmak:
+puantajda 26 gün yazan adamın bordrosunda 26 gün mü var? Fazla mesai girilen
+kişinin bordrosunda fazla mesai tutarı görünüyor mu? Bu ay giren personel her iki
+listede de var mı?
+
+Bunların hepsi ikili karşılaştırma. Hiçbiri mevzuat bilmiyor. Hiçbiri karar
+vermiyor. Ve hepsi, insanın en kötü olduğu türden iş: sıkıcı, tekrarlayan ve
+dikkat gerektiren. 15 kişide gözle yaparsın. 80 kişide, ay sonunda, üçüncü kez
+baştan sayarken yapamazsın.
+
+Bu yüzden `kontrol.py` mevzuat hakkında hiçbir şey bilmiyor. İki CSV alıyor,
+dokuz kontrolü çalıştırıyor, bir liste veriyor.
+
+```bash
+python kontrol.py --puantaj puantaj.csv --bordro bordro.csv
+```
+
+```
+ONEM   KOD   SICIL      AD SOYAD        ACIKLAMA
+HATA   E01   1007       Murat S.        Puantajda var, bordroda yok
+HATA   E07   1005       Elif A.         Net 31.200,00 > Brut 30.000,00
+UYARI  E03   1003       Sema D.         Puantaj 30 gun, bordro SGK 28 gun
+UYARI  E05   1001       Ahmet Y.        12 saat fazla mesai var, bordroda tutar yok
+```
+
+## Neden Excel formülü yetmedi
+
+Haklı bir soru: bunların çoğu `DÜŞEYARA` ile de yapılabilir. Yapılabilir, ama üç
+sorun var.
+
+**Formül tabloya yapışır.** Kontrol formüllerini bordro dosyasının içine yazarsan,
+her ay yeni dosyada baştan kurman gerekir. Kontrolü veriden ayırmadığın sürece
+kontrol de veri kadar kırılgan olur.
+
+**Excel sessizce yanılır.** `DÜŞEYARA` eşleşme bulamazsa `#YOK` verir, sen de
+`EĞERHATA` ile onu boşluğa çevirirsin ve satır gözden kaybolur. Script eşleşme
+bulamazsa bunu bir bulgu olarak yazmak zorunda — kaçamıyor.
+
+**Hesap ile kontrol iç içe geçiyor.** Aynı dosyada hem hesap yapıp hem o hesabı
+kontrol edersen, hatalı formül hem sonucu hem kontrolü aynı anda bozar. Kontrolün
+dışarıda, ayrı bir yerde durmasının asıl sebebi bu.
+
+Excel'i bırakmadım. Veri hâlâ Excel'de duruyor, ben hâlâ Excel'de çalışıyorum.
+Sadece **doğrulama katmanını dışarı aldım.**
+
+## Ne kazandırdı, ne kazandırmadı
+
+Kazandırdığı ölçülebilir: ay sonu kontrolü ortalama 2–3 saatten 10 dakikaya indi.
+Daha önemlisi, gözden kaçan tipte hataları — bordroda olup puantajda olmayan
+personel gibi — artık hiç kaçırmıyorum.
+
+Kazandırmadığı da net: bordroyu hâlâ ben kontrol ediyorum. Script "buraya bak"
+diyor, "burası yanlış" demiyor. Ürettiği uyarıların bir kısmı beklenen durumlar
+oluyor (ay içinde giren personelde gün farkı normal). Yani listeyi okumak ve
+yorumlamak hâlâ benim işim.
+
+Bunu bir eksiklik olarak görmüyorum. Kontrolü devretmek zaten bu demek: makine
+şüphelendiği yeri işaretler, kararı insan verir. Karar da devredilseydi, bir hata
+çıktığında kimse nerede olduğunu bilemezdi.
+
+## Sıradaki adım
+
+Şu an aracı tek şantiyeden çok şantiyeli yapıya taşıyorum. Aynı kontrolü klasördeki
+bütün dosya çiftlerine uygulayıp tek bir özet rapor üreten bir katman. Kontrollerin
+kendisi aynı kalacak — asıl işi zaten onlar yapıyor.
+
+Paketi aşağıdan indirebilirsin. İçinde bilerek hatalı hazırlanmış örnek veri var;
+önce onunla çalıştır, çıktının beklenenle aynı olduğunu gör, sonra kendi verine geç.

@@ -1,0 +1,210 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjeKart from '../components/ProjeKart.astro';
+import YaziKart from '../components/YaziKart.astro';
+import KaynakKart from '../components/KaynakKart.astro';
+import BolumBasligi from '../components/BolumBasligi.astro';
+import Terminal from '../components/Terminal.astro';
+import ProfilKarti from '../components/ProfilKarti.astro';
+import { SITE, KATEGORILER } from '../consts.mjs';
+
+const projeler = (await getCollection('projeler'))
+  .filter((p) => p.data.oneCikan)
+  .sort((a, b) => b.data.tarih.valueOf() - a.data.tarih.valueOf())
+  .slice(0, 2);
+
+const yazilar = (await getCollection('yazilar', ({ data }) => !data.taslak))
+  .sort((a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf())
+  .slice(0, 3);
+
+const kaynaklar = (await getCollection('kaynaklar'))
+  .sort((a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf())
+  .slice(0, 2);
+
+const stack = [
+  'Python', 'pandas', 'React', 'Vite', 'Electron', 'Ollama',
+  'Yerel LLM', 'Astro', 'TypeScript', 'Excel', 'SQL', 'Otomasyon',
+];
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.author,
+  url: SITE.url,
+  jobTitle: 'Şantiye Muhasebesi / Yazılım ve Otomasyon',
+  knowsAbout: [
+    'Şantiye muhasebesi', 'Bordro ve SGK süreçleri', 'Python',
+    'React', 'Yerel yapay zekâ modelleri', 'Otomasyon',
+  ],
+  email: `mailto:${SITE.email}`,
+  image: new URL(SITE.avatar, SITE.url).href,
+  address: { '@type': 'PostalAddress', addressCountry: 'TR' },
+  // sameAs: Google'a "bu profillerin sahibi aynı kişi" der.
+  sameAs: [SITE.github, SITE.linkedin, SITE.instagram],
+};
+---
+
+<BaseLayout baslik={SITE.title} aciklama={SITE.description} jsonLd={jsonLd}>
+  {/* ═══════════ GİRİŞ ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 pt-20 pb-16 sm:pt-24 sm:pb-20" aria-labelledby="giris-baslik">
+   <div class="grid gap-12 lg:grid-cols-[minmax(0,1fr)_26rem] lg:gap-14 items-center">
+    <div class="min-w-0">
+    <div
+      class="inline-flex items-center gap-2.5 mb-8 pl-2 pr-3.5 py-1.5 rounded-full border"
+      style="border-color: var(--border); background: var(--surface);"
+      data-giris
+    >
+      <span class="relative flex w-2 h-2" aria-hidden="true">
+        <span class="absolute inline-flex w-full h-full rounded-full opacity-60 animate-ping" style="background: var(--kat-muhasebe);"></span>
+        <span class="relative inline-flex w-2 h-2 rounded-full" style="background: var(--kat-muhasebe);"></span>
+      </span>
+      <span class="font-[var(--font-mono)] text-xs" style="color: var(--text-muted);">
+        Şantiye muhasebesi · aktif olarak üretiyor
+      </span>
+    </div>
+
+    <h1 id="giris-baslik" class="max-w-[19ch] sm:max-w-[22ch]" data-giris>
+      Şantiyede muhasebe tutuyorum, işin tekrar eden kısmını
+      <span class="gradyan-metin">yazılıma devrediyorum</span><span class="imlec" aria-hidden="true"></span>
+    </h1>
+
+    <p class="mt-7 max-w-2xl text-lg" style="color: var(--text-muted);" data-giris>
+      Puantaj, bordro, SGK ve cari hesap süreçlerinin içindeyim. Aynı zamanda Python ve kendi
+      bilgisayarımda çalışan yapay zekâ modelleriyle bu süreçleri hızlandıran araçlar yazıyorum.
+      Burada yaptığım işleri, <strong style="color: var(--text);">ölçtüğüm sonuçları</strong> ve
+      <strong style="color: var(--text);">çözemediklerimi</strong> yazıyorum.
+    </p>
+
+    <div class="mt-9 flex flex-wrap gap-3" data-giris>
+      <a href="/projeler" class="buton buton-birincil">
+        Projelere bak
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href="/hakkimda" class="buton buton-ikincil">Hakkımda</a>
+    </div>
+    </div>
+
+    {/* Sağ sütun: yazdığım aracın gerçek çıktısı */}
+    <div class="min-w-0" data-giris>
+      <p class="mono-etiket mb-3">Yazdığım araç · canlı çıktı</p>
+      <Terminal />
+      <p class="mt-3 text-xs" style="color: var(--text-soluk);">
+        <a href="/kaynaklar/puantaj-kontrol-paketi" class="baglanti">kontrol.py</a> — örnek veriyle
+        gerçek çalıştırma çıktısı, indirilebilir.
+      </p>
+    </div>
+   </div>
+
+    {/* Dört içerik sütunu */}
+    <ul class="mt-16 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Yazdığım konular">
+      {
+        Object.entries(KATEGORILER).map(([anahtar, k]) => (
+          <li
+            class="kutu kart-spot p-4 flex items-center gap-3"
+            style={`--kat: var(--kat-${anahtar}); --spot-renk: color-mix(in srgb, var(--kat-${anahtar}) 12%, transparent);`}
+            data-giris
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full shrink-0"
+              style={`background: var(--kat-${anahtar}); box-shadow: 0 0 12px var(--kat-${anahtar});`}
+              aria-hidden="true"
+            />
+            <span class="text-sm font-medium">{k.ad}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* ═══════════ TEKNOLOJİ ŞERİDİ ═══════════ */}
+  <div
+    class="serit-kap relative overflow-hidden border-y py-4"
+    style="border-color: var(--border); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);"
+    aria-hidden="true"
+  >
+    <div class="serit gap-10">
+      {
+        [0, 1].map(() =>
+          stack.map((s) => (
+            <span class="font-[var(--font-mono)] text-sm flex items-center gap-10 shrink-0" style="color: var(--text-soluk);">
+              {s}
+              <span style="color: var(--accent); opacity: 0.5;">/</span>
+            </span>
+          ))
+        )
+      }
+    </div>
+  </div>
+  <p class="sr-only">Kullandığım teknolojiler: {stack.join(', ')}.</p>
+
+  {/* ═══════════ PROJELER ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 py-20" aria-labelledby="projeler-baslik">
+    <BolumBasligi no="01" baslik="Öne çıkan projeler" href="/projeler" id="projeler-baslik" />
+    <div class="grid gap-4 md:grid-cols-2">
+      {projeler.map((p) => <ProjeKart proje={p} vurgulu />)}
+    </div>
+  </section>
+
+  {/* ═══════════ YAZILAR ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 py-20" aria-labelledby="yazilar-baslik">
+    <BolumBasligi no="02" baslik="Son yazılar" href="/blog" id="yazilar-baslik" />
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {yazilar.map((y) => <YaziKart yazi={y} />)}
+    </div>
+  </section>
+
+  {/* ═══════════ KAYNAKLAR ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 py-20" aria-labelledby="kaynaklar-baslik">
+    <BolumBasligi no="03" baslik="İndirilebilir kaynaklar" href="/kaynaklar" id="kaynaklar-baslik" />
+
+    <div class="grid gap-4 lg:grid-cols-3">
+      {kaynaklar.map((k) => <KaynakKart kaynak={k} />)}
+
+      <div
+        class="kutu p-6 flex flex-col justify-center"
+        style="background: linear-gradient(150deg, var(--accent-soft), transparent 70%), var(--surface); border-color: color-mix(in srgb, var(--accent) 28%, var(--border));"
+        data-reveal
+      >
+        <p class="mono-etiket mb-3" style="color: var(--accent);">Kural</p>
+        <p class="text-sm" style="color: var(--text-muted);">
+          Buradaki her dosya, onu anlatan bir yazıya bağlı. Dosyayı indirmeden önce neyi nasıl
+          yaptığını okuyabilirsin — kopyala-yapıştır bir script deposu değil.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* ═══════════ PROFİL ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 py-20" aria-labelledby="profil-baslik">
+    <BolumBasligi no="04" baslik="Kim yazıyor" id="profil-baslik" />
+    <ProfilKarti />
+  </section>
+
+  {/* ═══════════ KAPANIŞ ═══════════ */}
+  <section class="mx-auto max-w-6xl px-5 pb-8" aria-labelledby="iletisim-baslik">
+    <div
+      class="kutu kart-spot relative overflow-hidden px-6 py-12 sm:px-12 sm:py-16 text-center"
+      data-reveal
+    >
+      <div
+        class="absolute inset-x-0 top-0 h-px"
+        style="background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);"
+        aria-hidden="true"
+      >
+      </div>
+
+      <h2 id="iletisim-baslik" class="max-w-[20ch] mx-auto">
+        Benzer bir süreci otomatikleştirmek mi istiyorsun?
+      </h2>
+      <p class="mt-4 max-w-lg mx-auto" style="color: var(--text-muted);">
+        Muhasebe tarafındaki tekrar eden bir işi yazılıma devretmek üzerine konuşabiliriz.
+        Ya da sadece bir yazıdaki hatayı söylemek için yazabilirsin.
+      </p>
+      <a href="/iletisim" class="buton buton-birincil mt-8">
+        İletişime geç
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+</BaseLayout>

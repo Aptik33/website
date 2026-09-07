@@ -1,0 +1,84 @@
+---
+/**
+ * Terminal — 21st.dev'deki "Terminal" kalıbından (Magic UI) uyarlandı.
+ *
+ * Orijinali React + framer-motion; buradaki Astro + Motion (vanilla) portu.
+ * Kod kopyalanmadı, kalıp uyarlandı: pencere kromu, satır satır yazılma,
+ * imleç. Renkler bu sitenin tokenlarına çevrildi.
+ *
+ * İçerik uydurma DEĞİL: `public/indir/puantaj-kontrol-v1.zip` içindeki
+ * kontrol.py'nin örnek veriyle gerçek çıktısı.
+ */
+
+interface Satir {
+  tip: 'komut' | 'cikti' | 'ayrac' | 'hata' | 'uyari' | 'ozet';
+  metin: string;
+}
+
+const satirlar: Satir[] = [
+  { tip: 'komut', metin: 'python kontrol.py --puantaj puantaj.csv --bordro bordro.csv' },
+  { tip: 'cikti', metin: 'Puantaj-Bordro capraz kontrol  v1.0.0' },
+  { tip: 'ayrac', metin: '================================================' },
+  { tip: 'cikti', metin: 'Karsilastirilan personel : 7' },
+  { tip: 'cikti', metin: 'Bulgu sayisi             : 7' },
+  { tip: 'ayrac', metin: '' },
+  { tip: 'hata', metin: 'HATA   E01   1007   Puantajda var, bordroda yok' },
+  { tip: 'hata', metin: 'HATA   E07   1005   Net 31.200,00 > Brut 30.000,00' },
+  { tip: 'uyari', metin: 'UYARI  E03   1003   Puantaj 30 gun, bordro SGK 28 gun' },
+  { tip: 'uyari', metin: 'UYARI  E05   1001   12 saat fazla mesai, bordroda tutar yok' },
+  { tip: 'ayrac', metin: '' },
+  { tip: 'ozet', metin: '3 hata, 4 uyari.  (elle 2-3 saat / burada 0,4 sn)' },
+];
+
+// Renkler temadan bağımsız: terminal her iki temada da koyu zeminli.
+const renk: Record<Satir['tip'], string> = {
+  komut: 'var(--terminal-metin)',
+  cikti: 'var(--terminal-soluk)',
+  ayrac: 'var(--terminal-soluk)',
+  hata: 'var(--terminal-hata)',
+  uyari: 'var(--terminal-uyari)',
+  ozet: 'var(--terminal-ok)',
+};
+---
+
+<div class="kutu overflow-hidden" style="background: var(--terminal-bg);" data-terminal>
+  {/* Pencere kromu */}
+  <div
+    class="flex items-center gap-2 px-4 py-2.5 border-b"
+    style="border-color: var(--border); background: var(--terminal-bar);"
+  >
+    <span class="flex gap-1.5" aria-hidden="true">
+      <span class="w-2.5 h-2.5 rounded-full" style="background: #ff5f57"></span>
+      <span class="w-2.5 h-2.5 rounded-full" style="background: #febc2e"></span>
+      <span class="w-2.5 h-2.5 rounded-full" style="background: #28c840"></span>
+    </span>
+    <span class="ml-2 font-[var(--font-mono)] text-[0.6875rem]" style="color: var(--terminal-soluk);">
+      bash — puantaj-kontrol
+    </span>
+  </div>
+
+  {/* Çıktı */}
+  <div class="px-4 py-4 overflow-x-auto">
+    <pre
+      class="font-[var(--font-mono)] text-[0.6875rem] sm:text-xs leading-[1.75] m-0"
+    ><code>{
+      satirlar.map((s, i) => (
+        <span
+          class="block whitespace-pre"
+          style={`color: ${renk[s.tip]};`}
+          data-terminal-satir
+          data-terminal-sira={String(i)}
+        >{s.tip === 'komut' ? <span style="color: var(--accent);">$ </span> : null}{s.metin || ' '}</span>
+      ))
+    }</code></pre>
+    <span
+      class="inline-block w-[0.5em] h-[1em] align-text-bottom"
+      style="background: var(--accent);"
+      data-terminal-imlec
+      aria-hidden="true"></span>
+  </div>
+
+  <p class="sr-only">
+    kontrol.py örnek veri üzerinde çalıştırıldığında 3 hata ve 4 uyarı buluyor.
+  </p>
+</div>

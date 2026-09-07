@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import KategoriRozet from './KategoriRozet.astro';
+import { tarihTR, okumaSuresi } from '../lib/utils';
+
+interface Props {
+  yazi: CollectionEntry<'yazilar'>;
+}
+
+const { yazi } = Astro.props;
+const d = yazi.data;
+---
+
+<article
+  class="kutu kart-spot kat-serit p-6 flex flex-col h-full"
+  style={`--kat: var(--kat-${d.kategori});`}
+  data-reveal
+>
+  <div class="flex items-center gap-2 flex-wrap mb-4">
+    <KategoriRozet kategori={d.kategori} />
+    <span class="etiket">{okumaSuresi(yazi.body ?? '')} dk</span>
+  </div>
+
+  <h3 class="text-lg leading-snug">
+    <a
+      href={`/blog/${yazi.id}`}
+      class="transition-colors hover:text-[var(--accent)] after:absolute after:inset-0"
+    >
+      {d.baslik}
+      <span class="sr-only"> — yazıyı oku</span>
+    </a>
+  </h3>
+
+  <p class="mt-2.5 text-sm flex-1" style="color: var(--text-muted);">{d.ozet}</p>
+
+  <div class="mt-5 pt-4 border-t flex items-center justify-between gap-3" style="border-color: var(--border);">
+    <p class="font-[var(--font-mono)] text-xs" style="color: var(--text-soluk);">
+      <time datetime={d.yayinTarihi.toISOString()}>{tarihTR(d.yayinTarihi)}</time>
+    </p>
+    <span class="font-[var(--font-mono)] text-xs" style="color: var(--accent);" aria-hidden="true">→</span>
+  </div>
+</article>

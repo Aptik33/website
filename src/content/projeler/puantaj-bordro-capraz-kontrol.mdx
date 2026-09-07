@@ -1,0 +1,102 @@
+---
+baslik: "Puantaj – Bordro Çapraz Kontrol Aracı"
+ozet: "Şantiye puantajı ile bordro çıktısını satır satır karşılaştırıp gün, fazla mesai ve personel eşleşmesi tutarsızlıklarını yakalayan Python aracı. Ay sonu kontrolünü saatlerden dakikalara indirdi."
+tarih: 2026-08-24
+durum: "aktif"
+kategori: "muhasebe"
+stack: ["Python 3.10", "csv (stdlib)", "argparse", "dataclasses"]
+oneCikan: true
+metrikler:
+  - etiket: "Ay sonu kontrol süresi"
+    deger: "2–3 sa → ~10 dk"
+  - etiket: "Otomatik kontrol"
+    deger: "9 kural"
+  - etiket: "Harici bağımlılık"
+    deger: "0"
+  - etiket: "Kapsanan personel"
+    deger: "80+"
+ilgiliYazilar: ["excel-birakmadan-kontrolu-pythona-devretmek"]
+ilgiliKaynaklar: ["puantaj-kontrol-paketi"]
+sinirlar: "Araç mevzuat bilmiyor: asgari ücret, SGK tavanı, vergi dilimi ve teşvik hesapları tamamen kapsam dışı. Eksik gün kodunun dolu olup olmadığına bakıyor ama doğru kod olup olmadığını denetlemiyor. Ay içinde giriş veya çıkışı olan personelde kıst ücret hesabı yapmadığı için beklenen gün farklarını da uyarı olarak listeliyor; bu yanlış pozitifleri eleme işi hâlâ bende. Girdi olarak temiz CSV bekliyor, birleştirilmiş hücre veya serbest not içeren ham Excel dosyalarını okuyamıyor — dosyayı hazırlamak manuel bir adım olarak duruyor. En önemlisi: araç karar vermiyor, temiz çıkması bordronun doğru olduğu anlamına gelmiyor."
+---
+
+## Problem
+
+Bordro çıktıktan sonra yapılan kontrol, hesaplama değil karşılaştırma işidir.
+Puantajda 26 gün yazan kişinin bordrosunda 26 gün var mı? Fazla mesai girilen
+kişinin bordrosunda tutar görünüyor mu? Bu ay giren personel her iki listede de
+var mı?
+
+15 kişide bunu gözle yaparsın. 80 kişide, ay sonunda, üçüncü kez baştan sayarken
+yapamazsın — ve en tehlikeli hata türü de tam burada oluşuyor: **bir listede olup
+diğerinde olmayan personel.** Gözle tarama bunu yakalamakta özellikle kötü, çünkü
+orada bir satır yok; dikkatini çekecek bir şey de yok.
+
+## Yaklaşım
+
+Aracı bilinçli olarak dar tuttum. Üç tasarım kararı:
+
+**Hesaplama yok, sadece karşılaştırma.** Mevzuat kodun içine girdiği an, o kodun
+bakım sorumluluğunu da almış oluyorsun. Asgari ücret değiştiğinde güncellemeyi
+unutursan araç sessizce yanlış çalışmaya başlar — ve yanlış bordronun bedeli
+kaybedilen zaman değil, ceza. Bu yüzden araç hiçbir tutar hesaplamıyor.
+
+**Sıfır bağımlılık.** Sadece standart kütüphane. Şantiyedeki bir bilgisayara
+`pip install` yapmak zorunda kalmadan çalışsın istedim; kurulum adımı olan bir
+araç, birinin kullanmayacağı bir araçtır.
+
+**Gerçek dünya verisine dayanıklılık.** Excel'den çıkan CSV'ler ya UTF-8 BOM'lu ya
+`cp1254` oluyor, ayraç bazen noktalı virgül bazen virgül, sayılar bazen `1.234,56`
+bazen `1234.56`. Bunların hepsi otomatik çözülüyor. Kulağa önemsiz geliyor ama
+gerçek hayatta scriptleri en çok bunlar patlatıyor.
+
+### Kontrol kümesi
+
+```
+E01  Puantajda var, bordroda yok                    → hata
+E02  Bordroda var, puantajda yok                    → hata
+E03  Çalışılan gün ≠ SGK günü                       → uyarı
+E04  SGK günü < 30 ama eksik gün kodu boş           → uyarı
+E05  Fazla mesai saati var, tutar yok                → uyarı
+E06  Fazla mesai tutarı var, saat yok                → uyarı
+E07  Net > Brüt                                      → hata
+E08  SGK günü 0 ama brüt ücret var                  → hata
+E09  Aynı sicil birden fazla satırda                → hata
+```
+
+Hata/uyarı ayrımı bilinçli: hatalar kesinlikle yanlış olan durumlar, uyarılar ise
+"açıklaması olabilir ama bakman gerekir" durumları. Araç ikisini karıştırmıyor,
+çünkü karıştırdığı an insan tüm listeyi görmezden gelmeye başlıyor.
+
+## Sonuç
+
+```
+Karsilastirilan personel : 7
+Bulgu sayisi             : 7
+
+ONEM   KOD   SICIL   AD SOYAD        ACIKLAMA
+HATA   E01   1007    Murat S.        Puantajda var, bordroda yok
+HATA   E02   1006    Yeni Personel   Bordroda var, puantajda yok
+HATA   E07   1005    Elif A.         Net 31.200,00 > Brut 30.000,00
+UYARI  E03   1003    Sema D.         Puantaj 30 gun, bordro SGK 28 gun
+```
+
+Ay sonu kontrolü ortalama 2–3 saatten yaklaşık 10 dakikaya indi. Ama asıl kazanç
+süre değil: eşleşme hatalarını artık hiç kaçırmıyorum. Süre ölçülebilir olduğu için
+öne çıkıyor, önemli olan diğeri.
+
+Çıkış kodu hata varsa `1` döndüğü için toplu çalıştırmaya uygun — şu an üzerinde
+çalıştığım şey de bu: klasördeki bütün şantiye dosya çiftlerini gezip tek bir özet
+rapor üreten bir katman.
+
+## Ne öğrendim
+
+**Aracın değeri zekasında değil, yorulmamasında.** Yaptığı dokuz kontrolün hiçbiri
+zor değil; hepsini elle de yapabilirim. Fark, aracın 80. satırda da ilk satırdaki
+dikkatle bakması.
+
+**Kapsamı dar tutmak bir kısıt değil, tasarım kararı.** Mevzuatı da hesaplasaydı
+araç çok daha etkileyici görünürdü ve çok daha kısa sürede güvenilmez hale gelirdi.
+
+**Karar insanda kalmalı.** Araç "buraya bak" diyor, "burası yanlış" demiyor. Karar
+da devredilseydi, bir hata çıktığında kimse nerede olduğunu bulamazdı.

@@ -1,0 +1,69 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import KategoriRozet from './KategoriRozet.astro';
+import { tarihTR, DURUM_ETIKET, sayacBilgisi } from '../lib/utils';
+
+interface Props {
+  proje: CollectionEntry<'projeler'>;
+  /** Öne çıkan kartta animasyonlu kenarlık açılır. */
+  vurgulu?: boolean;
+}
+
+const { proje, vurgulu = false } = Astro.props;
+const d = proje.data;
+---
+
+<article
+  class:list={['kutu kart-spot kat-serit p-6 flex flex-col h-full', vurgulu && 'kenar-isin']}
+  style={`--kat: var(--kat-${d.kategori});`}
+  data-reveal
+>
+  <div class="flex items-center gap-2 flex-wrap mb-4">
+    <KategoriRozet kategori={d.kategori} />
+    <span class="etiket">{DURUM_ETIKET[d.durum]}</span>
+  </div>
+
+  <h3 class="text-xl leading-snug">
+    <a
+      href={`/projeler/${proje.id}`}
+      class="transition-colors hover:text-[var(--accent)] after:absolute after:inset-0"
+    >
+      {d.baslik}
+      {/* Kart tamamı tıklanabilir; ekran okuyucuya bağlamı burada veriyoruz. */}
+      <span class="sr-only"> — proje detayını aç</span>
+    </a>
+  </h3>
+
+  <p class="mt-2.5 text-sm flex-1" style="color: var(--text-muted);">{d.ozet}</p>
+
+  {
+    d.metrikler.length > 0 && (
+      <dl class="mt-5 grid grid-cols-2 gap-4 pt-5 border-t" style="border-color: var(--border);">
+        {d.metrikler.slice(0, 2).map((m) => {
+          const sayac = sayacBilgisi(m.deger);
+          return (
+            <div>
+              <dt class="mono-etiket text-[0.625rem]">{m.etiket}</dt>
+              <dd
+                class="font-[var(--font-baslik)] text-lg mt-1 tabular-nums"
+                style="color: var(--accent);"
+                data-sayac={sayac ? String(sayac.sayi) : undefined}
+                data-sayac-sonek={sayac ? sayac.sonek : undefined}
+              >
+                {m.deger}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+    )
+  }
+
+  <div class="mt-5 flex flex-wrap gap-1.5">
+    {d.stack.slice(0, 5).map((s) => <span class="etiket">{s}</span>)}
+  </div>
+
+  <p class="mt-4 font-[var(--font-mono)] text-xs" style="color: var(--text-soluk);">
+    <time datetime={d.tarih.toISOString()}>{tarihTR(d.tarih)}</time>
+  </p>
+</article>

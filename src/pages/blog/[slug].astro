@@ -1,0 +1,165 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import KategoriRozet from '../../components/KategoriRozet.astro';
+import { SITE, YORUMLAR } from '../../consts.mjs';
+import { tarihTR, okumaSuresi, slugify, boyutFormat } from '../../lib/utils';
+
+export async function getStaticPaths() {
+  const yazilar = (await getCollection('yazilar', ({ data }) => !data.taslak)).sort(
+    (a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf()
+  );
+
+  // "Diğer yazılar" listesi de burada hesaplanıp props ile taşınıyor;
+  // aksi halde her sayfa için getCollection ikinci kez çağrılıyordu.
+  return yazilar.map((yazi) => ({
+    params: { slug: yazi.id },
+    props: {
+      yazi,
+      digerleri: yazilar.filter((y) => y.id !== yazi.id).slice(0, 2),
+    },
+  }));
+}
+
+const { yazi, digerleri } = Astro.props;
+const d = yazi.data;
+const { Content, headings } = await render(yazi);
+
+const kaynak = d.kaynakDosya ? await getEntry(d.kaynakDosya) : null;
+
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: d.baslik,
+  description: d.ozet,
+  datePublished: d.yayinTarihi.toISOString(),
+  dateModified: (d.guncellemeTarihi ?? d.yayinTarihi).toISOString(),
+  inLanguage: 'tr-TR',
+  keywords: d.etiketler.join(', '),
+  author: { '@type': 'Person', name: SITE.author, url: SITE.url },
+  publisher: { '@type': 'Person', name: SITE.author },
+  mainEntityOfPage: new URL('/blog/' + yazi.id, SITE.url).href,
+};
+---
+
+<BaseLayout baslik={d.baslik} aciklama={d.ozet} tur="article" jsonLd={jsonLd} ogYol={`/og/blog/${yazi.id}.png`}>
+  <article class="mx-auto max-w-6xl px-5 pt-12">
+    <header class="max-w-3xl">
+      <nav class="font-[var(--font-mono)] text-xs mb-6" style="color: var(--text-muted);" aria-label="Konum">
+        <a href="/blog" class="hover:text-[var(--accent)]">blog</a> / <span>{yazi.id}</span>
+      </nav>
+
+      <div class="flex flex-wrap items-center gap-2 mb-5">
+        <KategoriRozet kategori={d.kategori} />
+        <span class="etiket">{okumaSuresi(yazi.body ?? '')} dk okuma</span>
+        <span class="etiket">
+          <time datetime={d.yayinTarihi.toISOString()}>{tarihTR(d.yayinTarihi)}</time>
+        </span>
+        {d.guncellemeTarihi && (
+          <span class="etiket" style="color: var(--accent);">
+            Güncellendi: {tarihTR(d.guncellemeTarihi)}
+          </span>
+        )}
+      </div>
+
+      <h1>{d.baslik}</h1>
+      <p class="mt-5 text-lg" style="color: var(--text-muted);">{d.ozet}</p>
+    </header>
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-14 items-start">
+      <div class="yazi" data-pagefind-body>
+        <Content />
+      </div>
+
+      <aside class="lg:sticky lg:top-24 order-first lg:order-none">
+        {toc.length > 1 && (
+          <nav class="kutu p-4 mb-4" aria-label="İçindekiler">
+            <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-3" style="color: var(--text-muted);">
+              İçindekiler
+            </p>
+            <ol class="space-y-1.5 text-sm">
+              {toc.map((h) => (
+                <li style={h.depth === 3 ? 'padding-left: 0.9rem' : ''}>
+                  <a href={'#' + h.slug} class="hover:text-[var(--accent)]" style="color: var(--text-muted);">
+                    {h.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+
+        <div class="flex flex-wrap gap-1.5">
+          {d.etiketler.map((e) => (
+            <a href={'/blog/etiket/' + slugify(e)} class="etiket hover:text-[var(--accent)]">#{e}</a>
+          ))}
+        </div>
+      </aside>
+    </div>
+
+    {kaynak && (
+      <section class="mt-16 max-w-3xl">
+        <div class="kutu p-5" style="border-color: color-mix(in srgb, var(--accent) 35%, transparent);">
+          <p class="font-[var(--font-mono)] text-xs uppercase tracking-wider mb-2" style="color: var(--accent);">
+            Bu yazının dosyası
+          </p>
+          <h2 class="text-xl">{kaynak.data.baslik}</h2>
+          <p class="mt-2 text-sm" style="color: var(--text-muted);">{kaynak.data.aciklama}</p>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <a href={'/kaynaklar/' + kaynak.id} class="buton buton-birincil text-sm">Kaynak sayfasına git</a>
+            <span class="font-[var(--font-mono)] text-xs" style="color: var(--text-muted);">
+              {kaynak.data.dosyaAdi} · {boyutFormat(kaynak.data.dosyaBoyutu)} · v{kaynak.data.surum}
+            </span>
+          </div>
+        </div>
+      </section>
+    )}
+
+    {YORUMLAR.aktif && (
+      <section class="mt-16 max-w-3xl" aria-label="Yorumlar">
+        <h2 class="text-xl mb-4">Yorumlar</h2>
+        <p class="text-sm mb-4" style="color: var(--text-muted);">
+          Yorumlar GitHub Discussions üzerinden çalışır; yorum yazmak için GitHub hesabı gerekir.
+        </p>
+        <div class="kutu p-4">
+          <script
+            is:inline
+            src="https://giscus.app/client.js"
+            data-repo={YORUMLAR.repo}
+            data-repo-id={YORUMLAR.repoId}
+            data-category={YORUMLAR.kategori}
+            data-category-id={YORUMLAR.kategoriId}
+            data-mapping="pathname"
+            data-strict="1"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="dark_dimmed"
+            data-lang="tr"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async
+          />
+        </div>
+      </section>
+    )}
+
+    {digerleri.length > 0 && (
+      <section class="mt-16">
+        <h2 class="text-xl mb-5">Bunları da okuyabilirsin</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          {digerleri.map((y) => (
+            <a href={'/blog/' + y.id} class="kutu kutu-hover p-4 block">
+              <p class="font-[var(--font-mono)] text-xs mb-2" style="color: var(--text-muted);">
+                {tarihTR(y.data.yayinTarihi)}
+              </p>
+              <p class="font-medium">{y.data.baslik}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </article>
+</BaseLayout>

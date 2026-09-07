@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SayfaBasligi from '../../components/SayfaBasligi.astro';
+import YaziKart from '../../components/YaziKart.astro';
+import { slugify } from '../../lib/utils';
+
+const yazilar = (await getCollection('yazilar', ({ data }) => !data.taslak)).sort(
+  (a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf()
+);
+
+const etiketSayac = new Map<string, number>();
+for (const y of yazilar) {
+  for (const e of y.data.etiketler) etiketSayac.set(e, (etiketSayac.get(e) ?? 0) + 1);
+}
+const etiketler = [...etiketSayac.entries()].sort((a, b) => b[1] - a[1]);
+---
+
+<BaseLayout
+  baslik="Blog"
+  aciklama="Şantiye muhasebesi süreçlerinin otomasyonu, Python, yerel yapay zekâ modelleri ve donanım üzerine ölçümlere dayalı notlar."
+>
+  <SayfaBasligi
+    ustBaslik="Notlar"
+    baslik="Blog"
+    aciklama="İddia değil ölçüm yazmaya çalışıyorum. Bir şeyin neden işe yaradığını ya da neden yaramadığını anlatmadan geçmiyorum."
+  />
+
+  <div class="mx-auto max-w-6xl px-5">
+    <div class="flex flex-wrap gap-2 mb-8">
+      {
+        etiketler.map(([e, n]) => (
+          <a href={`/blog/etiket/${slugify(e)}`} class="etiket hover:text-[var(--accent)]">
+            #{e} <span style="opacity:.6">{n}</span>
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {yazilar.map((y) => <YaziKart yazi={y} />)}
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+interface Props {
+  /** İki haneli bölüm numarası, ör. "01" */
+  no: string;
+  baslik: string;
+  href?: string;
+  hrefMetin?: string;
+  id?: string;
+}
+
+const { no, baslik, href, hrefMetin = 'Tümü', id } = Astro.props;
+---
+
+<div class="flex items-end justify-between gap-4 mb-7" data-reveal>
+  <div class="flex items-baseline gap-3">
+    <span class="mono-etiket select-none tabular-nums" aria-hidden="true" data-coz>{no}</span>
+    <span class="h-px w-8 bg-[var(--border-parlak)] mb-1.5" aria-hidden="true"></span>
+    <h2 id={id} class="text-2xl sm:text-3xl">{baslik}</h2>
+  </div>
+
+  {
+    href && (
+      <a
+        href={href}
+        class="group shrink-0 font-[var(--font-mono)] text-xs flex items-center gap-1.5 transition-colors hover:text-[var(--accent)]"
+        style="color: var(--text-muted);"
+      >
+        {hrefMetin}
+        <span class="transition-transform group-hover:translate-x-1" aria-hidden="true">→</span>
+      </a>
+    )
+  }
+</div>

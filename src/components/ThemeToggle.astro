@@ -1,0 +1,52 @@
+---
+import { YORUMLAR } from '../consts.mjs';
+---
+
+<button
+  type="button"
+  id="tema-btn"
+  class="grid place-items-center w-9 h-9 rounded-[var(--radius-buton)] border transition-colors hover:bg-[var(--surface-2)] hover:border-[var(--border-parlak)]"
+  aria-label="Temayı değiştir"
+  data-yorumlar={String(YORUMLAR.aktif)}
+>
+  <svg class="tema-ay" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+  <svg class="tema-gunes" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+  </svg>
+</button>
+
+<style>
+  :root[data-theme='dark'] .tema-gunes { display: none; }
+  :root[data-theme='light'] .tema-ay { display: none; }
+</style>
+
+<script>
+  const temaBtn = document.getElementById('tema-btn');
+  const yorumlarAktif = temaBtn?.dataset.yorumlar === 'true';
+
+  temaBtn?.addEventListener('click', () => {
+    const kok = document.documentElement;
+    const yeni = kok.dataset.theme === 'dark' ? 'light' : 'dark';
+    kok.dataset.theme = yeni;
+
+    try {
+      localStorage.setItem('tema', yeni);
+    } catch {}
+
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', yeni === 'dark' ? '#08090c' : '#fbfbf9');
+
+    // Giscus iframe'i kendi temasını taşır; postMessage ile senkron tutulur.
+    if (yorumlarAktif) {
+      const cerceve = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+      cerceve?.contentWindow?.postMessage(
+        { giscus: { setConfig: { theme: yeni === 'dark' ? 'dark_dimmed' : 'light' } } },
+        'https://giscus.app'
+      );
+    }
+  });
+</script>

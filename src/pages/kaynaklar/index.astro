@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SayfaBasligi from '../../components/SayfaBasligi.astro';
+import KaynakKart from '../../components/KaynakKart.astro';
+
+const kaynaklar = (await getCollection('kaynaklar')).sort(
+  (a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf()
+);
+---
+
+<BaseLayout
+  baslik="Kaynaklar"
+  aciklama="Kendi işimde kullandığım Excel şablonları, Python scriptleri ve yerel yapay zekâ konfigürasyonları — sürümlü, SHA-256 özetli ve MIT lisanslı."
+>
+  <SayfaBasligi
+    ustBaslik="İndirilebilir dosyalar"
+    baslik="Kaynaklar"
+    aciklama="Burada duran her dosyayı kendi işimde kullanıyorum. Her birinin bir sürümü, değişiklik günlüğü ve onu anlatan bir yazısı var."
+  />
+
+  <div class="mx-auto max-w-6xl px-5">
+    <div class="kutu p-4 mb-8 flex gap-3 items-start" role="note" aria-label="Kullanım uyarısı" style="background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 30%, transparent);">
+      <span class="font-[var(--font-mono)] text-xs shrink-0 mt-0.5" style="color: var(--accent);">NOT</span>
+      <p class="text-sm" style="color: var(--text-muted);">
+        Dosyalar örnek ve anonim veriyle gelir; içlerinde gerçek personel, firma veya cari bilgisi bulunmaz.
+        Kendi verinle çalıştırmadan önce örnek veri setiyle bir kez deneyip çıktıyı kontrol et.
+      </p>
+    </div>
+
+    <div class="grid gap-4 md:grid-cols-2">
+      {kaynaklar.map((k) => <KaynakKart kaynak={k} />)}
+    </div>
+  </div>
+</BaseLayout>

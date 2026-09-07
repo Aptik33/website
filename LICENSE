@@ -1,0 +1,37 @@
+Bu depo iki ayrı lisans altındadır.
+
+────────────────────────────────────────────────────────────────────
+KOD — MIT Lisansı
+────────────────────────────────────────────────────────────────────
+Kapsam: src/ altındaki tüm kaynak kod, yapılandırma dosyaları ve
+public/indir/ altındaki script ve şablonlar.
+
+Copyright (c) 2026 Abdullah Eryetkin
+
+İşbu yazılım ve ilgili belge dosyalarının ("Yazılım") bir kopyasını edinen
+herkese, Yazılımı kısıtlama olmaksızın kullanma, kopyalama, değiştirme,
+birleştirme, yayımlama, dağıtma, alt lisanslama ve/veya satma hakları da
+dahil olmak üzere sınırsız izin ücretsiz olarak verilmektedir; şu şartla ki
+yukarıdaki telif hakkı bildirimi ve işbu izin bildirimi Yazılımın tüm
+kopyalarında veya önemli parçalarında yer alsın.
+
+YAZILIM, AÇIK VEYA ZIMNİ HİÇBİR GARANTİ OLMAKSIZIN "OLDUĞU GİBİ"
+SUNULMAKTADIR. YAZARLAR VEYA TELİF HAKKI SAHİPLERİ, YAZILIMDAN VEYA
+KULLANIMINDAN DOĞAN HERHANGİ BİR İDDİA, HASAR VEYA DİĞER YÜKÜMLÜLÜKTEN
+SORUMLU TUTULAMAZ.
+
+────────────────────────────────────────────────────────────────────
+İÇERİK — CC BY 4.0
+────────────────────────────────────────────────────────────────────
+Kapsam: src/content/ altındaki yazılar, proje anlatımları ve kaynak
+açıklamaları.
+
+Creative Commons Atıf 4.0 Uluslararası (CC BY 4.0) ile lisanslanmıştır.
+Kaynak göstererek paylaşabilir ve uyarlayabilirsiniz.
+https://creativecommons.org/licenses/by/4.0/deed.tr
+
+────────────────────────────────────────────────────────────────────
+İSTİSNALAR
+────────────────────────────────────────────────────────────────────
+- src/fonts/*.ttf — SIL Open Font License 1.1 (bkz. src/fonts/README.md)
+- public/gorsel/* — kişisel fotoğraf, yeniden kullanıma kapalıdır.

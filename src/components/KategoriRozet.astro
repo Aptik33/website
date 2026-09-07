@@ -1,0 +1,12 @@
+---
+import { KATEGORILER } from '../consts.mjs';
+
+interface Props { kategori: keyof typeof KATEGORILER; }
+const { kategori } = Astro.props;
+const k = KATEGORILER[kategori];
+const degisken = `var(--kat-${kategori})`;
+---
+<span class="etiket" style={`color: ${degisken}; border-color: color-mix(in srgb, ${degisken} 35%, transparent); background: color-mix(in srgb, ${degisken} 10%, transparent);`}>
+  <span class="w-1.5 h-1.5 rounded-full" style={`background: ${degisken}`} aria-hidden="true"></span>
+  {k.ad}
+</span>

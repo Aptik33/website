@@ -1,0 +1,98 @@
+---
+baslik: "Puantaj – Bordro Çapraz Kontrol Paketi"
+aciklama: "Aynı ayın puantaj ve bordro dosyalarını satır satır karşılaştırıp gözden kaçan tutarsızlıkları listeleyen Python scripti, örnek veri seti ve kullanım notlarıyla."
+kategori: "muhasebe"
+dosyaAdi: "puantaj-kontrol-v1.zip"
+dosyaBoyutu: 5630
+formatlar: ["zip", "py", "csv", "md"]
+surum: "1.0.0"
+sha256: "c1a371857760adf24d63d2577bfb4ba92857dd28ec7e180e66f8b1846d018583"
+lisans: "MIT"
+gereksinimler:
+  - "Python 3.10 veya üzeri"
+  - "Harici kütüphane yok (yalnızca standart kütüphane)"
+  - "Puantaj ve bordro verisinin CSV olarak dışa aktarılabilmesi"
+yayinTarihi: 2026-08-24
+ilgiliYazi: "excel-birakmadan-kontrolu-pythona-devretmek"
+degisiklikGunlugu:
+  - surum: "1.0.0"
+    tarih: 2026-08-24
+    not: "İlk yayın. E01–E09 arası dokuz kontrol, CSV rapor çıktısı ve şablon üretme komutu."
+---
+
+## Bu paket ne yapıyor
+
+Ay sonunda bordro çıktıktan sonra yaptığım kontrolün otomatikleştirilmiş hali.
+Puantaj tablosu ile bordro çıktısını sicil numarası üzerinden eşleştirir ve dokuz
+ayrı tutarsızlığı arar:
+
+| kod | önem | kontrol |
+|---|---|---|
+| E01 | hata | Puantajda var, bordroda yok |
+| E02 | hata | Bordroda var, puantajda yok |
+| E03 | uyarı | Çalışılan gün ile SGK günü uyuşmuyor |
+| E04 | uyarı | SGK günü 30'un altında ama eksik gün kodu boş |
+| E05 | uyarı | Fazla mesai saati var, bordroda tutar yok |
+| E06 | uyarı | Bordroda fazla mesai tutarı var, puantajda saat yok |
+| E07 | hata | Net ücret brütten büyük |
+| E08 | hata | SGK günü 0 ama brüt ücret var |
+| E09 | hata | Aynı sicil birden fazla satırda |
+
+Bunların hiçbiri karmaşık değil. Zaten gözle de yapabilirsin — 15 kişide.
+80 kişide, ay sonunda, üçüncü kez baştan sayarken yapamıyorsun. Aracın varlık
+sebebi zeka değil, yorulmaması.
+
+## Nasıl çalıştırılır
+
+Paketi açtıktan sonra önce örnek veriyle dene:
+
+```bash
+python kontrol.py --puantaj ornek-puantaj.csv --bordro ornek-bordro.csv
+```
+
+Örnek veri bilerek hatalı hazırlandı; **3 hata ve 4 uyarı** üretmesi gerekiyor.
+Farklı bir sonuç alıyorsan kurulumda sorun var demektir, kendi verine geçme.
+
+Kendi dosyalarını hazırlamak için boş şablonları üret:
+
+```bash
+python kontrol.py --sablon-olustur
+```
+
+Bulguları dosyaya almak istersen:
+
+```bash
+python kontrol.py --puantaj puantaj.csv --bordro bordro.csv --rapor bulgular.csv
+```
+
+Çıkış kodu hata varsa `1`, temizse `0` döner. Birden fazla şantiyeyi tek seferde
+kontrol eden bir toplu iş yazmak istersen bu işine yarar.
+
+## Beklenen sütunlar
+
+`puantaj.csv` → `sicil`, `ad_soyad`, `calisilan_gun`, `fazla_mesai_saat`
+
+`bordro.csv` → `sicil`, `ad_soyad`, `sgk_gun`, `eksik_gun_kodu`, `brut_ucret`,
+`fazla_mesai_tutar`, `net_ucret`
+
+Sütun sırası önemli değil, adları önemli. Sayılarda hem `1.234,56` hem `1234.56`
+biçimi kabul edilir; Excel'den çıkan UTF-8 BOM'lu ve `cp1254` kodlamalı dosyalar
+otomatik çözülür. Bu ayrıntılar önemsiz görünüyor ama gerçek hayatta scriptleri
+en çok bunlar patlatıyor.
+
+## Sınırlar — kullanmadan önce oku
+
+- **Mevzuat kontrolü yapmaz.** Asgari ücret, SGK tavanı, vergi dilimi, teşvik
+  hesapları kapsam dışı. Yalnızca iki dosya arasındaki tutarlılığa bakar.
+- **Eksik gün kodunun doğru kod olup olmadığını denetlemez.** Sadece dolu olup
+  olmadığına bakar.
+- **Kıst ücret hesabı yapmaz.** Ay içinde girişi veya çıkışı olan personelde E03
+  uyarısı beklenen bir durum olabilir; bunu değerlendirmek sana kalır.
+- **Karar vermez.** Ürettiği her satır "buraya bak" demektir, "burası yanlış" demez.
+  Aracın temiz çıkması bordronun doğru olduğu anlamına gelmez.
+
+## Gizlilik
+
+Script tamamen yerel çalışır. Hiçbir veri internete gönderilmez, hiçbir servise
+bağlanmaz, hiçbir yere log yazmaz. Paketin içindeki örnek veri tamamen uydurmadır;
+gerçek personel, firma veya cari bilgisi içermez.

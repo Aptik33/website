@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SayfaBasligi from '../../../components/SayfaBasligi.astro';
+import YaziKart from '../../../components/YaziKart.astro';
+import { slugify } from '../../../lib/utils';
+
+export async function getStaticPaths() {
+  const yazilar = await getCollection('yazilar', ({ data }) => !data.taslak);
+  const harita = new Map<string, { ad: string; liste: typeof yazilar }>();
+
+  for (const y of yazilar) {
+    for (const e of y.data.etiketler) {
+      const s = slugify(e);
+      if (!harita.has(s)) harita.set(s, { ad: e, liste: [] });
+      harita.get(s)!.liste.push(y);
+    }
+  }
+
+  return [...harita.entries()].map(([s, v]) => ({
+    params: { etiket: s },
+    props: {
+      ad: v.ad,
+      yazilar: v.liste.sort((a, b) => b.data.yayinTarihi.valueOf() - a.data.yayinTarihi.valueOf()),
+    },
+  }));
+}
+
+const { ad, yazilar } = Astro.props;
+---
+
+<BaseLayout baslik={'#' + ad + ' etiketli yazılar'} aciklama={ad + ' konusunda yazdığım yazılar.'}>
+  <SayfaBasligi ustBaslik="Etiket" baslik={'#' + ad} aciklama={yazilar.length + ' yazı.'} />
+  <div class="mx-auto max-w-6xl px-5">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {yazilar.map((y) => <YaziKart yazi={y} />)}
+    </div>
+    <p class="mt-10"><a href="/blog" class="baglanti text-sm">← Tüm yazılar</a></p>
+  </div>
+</BaseLayout>
