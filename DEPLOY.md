@@ -16,16 +16,32 @@ Aşağıdakiler **senin hesabınla** yapılman gerekenler. Her adım 5–10 daki
 4. **README, .gitignore, license ekleme** — hepsi zaten var, çakışır
 5. "Create repository" de
 
-Sonra bu klasörde şunu çalıştır:
+### Push
+
+`git remote` zaten eklendi. Terminali **projenin klasöründe** açıp tek komut
+çalıştırman yeterli:
 
 ```bash
-git remote add origin https://github.com/Aptik33/website.git
 git push -u origin main
 ```
 
-Kullanıcı adı/parola sorarsa: parola yerine **Personal Access Token** gerekir.
+Proje klasörü: `C:\Users\abdul\Desktop\website`
+
+Bu makinede **Git Credential Manager** kurulu; ilk push'ta bir tarayıcı
+penceresi açılıp GitHub girişi isteyecek. **Personal Access Token'a gerek yok** —
+tarayıcıda "Authorize" de, gerisi otomatik. Giriş bir kez yapılır, sonraki
+push'lar sessiz geçer.
+
+Tarayıcı hiç açılmaz da kullanıcı adı/parola sorarsa o zaman token gerekir:
 https://github.com/settings/tokens → "Generate new token (classic)" →
-`repo` yetkisi → oluştur → parola alanına o token'ı yapıştır.
+`repo` yetkisi → parola alanına yapıştır.
+
+### Terminali doğru klasörde açmak
+
+- **En kolay:** Dosya Gezgini'nde proje klasörünü aç, adres çubuğuna `cmd` yazıp
+  Enter'a bas — terminal o klasörde açılır.
+- Veya PowerShell açıp: `cd $HOME\Desktop\website`
+- Veya bu uygulamanın Terminal panelini kullan; zaten doğru klasörde açılır.
 
 ---
 
