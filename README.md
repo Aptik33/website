@@ -4,6 +4,11 @@ Astro 5 · MDX içerik koleksiyonları · Tailwind 4 · **Motion (Framer Motion)
 
 > Animasyon kuralları ve hareket dili için `CLAUDE.md` dosyasına bak.
 
+## İçerik eklemek / düzenlemek
+
+Terminal bilmeden, tarayıcıdan: **[NASIL-GUNCELLERIM.md](NASIL-GUNCELLERIM.md)**
+Hazır şablonlar: `sablonlar/` klasörü.
+
 ## Komutlar
 
 ```bash
