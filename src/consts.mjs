@@ -1,5 +1,15 @@
 export const SITE = {
-  url: 'https://abdullaheryetkin.com',
+  /**
+   * Sitenin canlı adresi. Canonical, og:image, sitemap ve RSS buradan üretilir.
+   *
+   * Ortam değişkeni ile ezilebilir; böylece domain değiştiğinde kod değişmez:
+   *   Cloudflare → Settings → Variables → PUBLIC_SITE_URL
+   *
+   * Sondaki eğik çizgi OLMAMALI.
+   */
+  url:
+    (typeof process !== 'undefined' && process.env?.PUBLIC_SITE_URL) ||
+    'https://website.abdullaheryetkin033.workers.dev',
   name: 'Abdullah',
   title: 'Abdullah — Şantiye muhasebesi, otomasyon ve yerel yapay zekâ',
   description:

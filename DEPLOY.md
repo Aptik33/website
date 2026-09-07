@@ -230,3 +230,56 @@ Workers yerine **Pages** projesi aç:
 
 Pages statik hosting için adaptör kullanmaz; bu sorun orada hiç çıkmaz.
 Eski Worker projesini silebilirsin.
+
+---
+
+## Ücretsiz adres seçenekleri (domain parası yokken)
+
+Site şu an **https://website.abdullaheryetkin033.workers.dev** adresinde ve
+bu adres ücretsiz, süresiz. Ama uzun ve akılda kalmıyor.
+
+### Önerilen: `eryetkin.is-a.dev` — ücretsiz, kalıcı, taşınabilir
+
+[is-a.dev](https://is-a.dev), geliştiricilere ücretsiz alt alan adı veren bir
+servis. Cloudflare'in Project Alexandria programı destekliyor. Ücret yok,
+yenileme yok, reklam yok.
+
+`eryetkin.is-a.dev` **boş** (7 Eylül 2026 kontrolü).
+
+Nasıl alınır:
+1. https://docs.is-a.dev adresindeki adımları oku
+2. https://github.com/is-a-dev/register deposunu fork'la
+3. `domains/eryetkin.json` dosyasını oluştur — içine sahiplik bilgin ve
+   sitenin adresi girer
+4. Pull request aç, incelenip birleştirilmesini bekle
+
+> **Not:** is-a.dev, README'lerinde başvuruyu yapay zekâya yazdırmamanı açıkça
+> istiyor ("Do not use AI to generate your request"). Bu yüzden dosyayı sana
+> ben yazmıyorum — dokümanı takip edip kendin yaz, hem daha hızlı onaylanır.
+
+PR birleştikten sonra bana haber ver; Cloudflare tarafındaki bağlamayı ve
+`PUBLIC_SITE_URL` ayarını ben yaparım.
+
+### Alternatifler
+
+| seçenek | adres | not |
+|---|---|---|
+| Şimdiki | `website.abdullaheryetkin033.workers.dev` | Çalışıyor, uzun |
+| Cloudflare Pages | `eryetkin.pages.dev` | Tek etiket, daha kısa; Pages projesi açmak gerekir |
+| GitHub Pages | `aptik33.github.io` | Depoyu `Aptik33.github.io` diye yeniden adlandırmak gerekir |
+| `.com` | `abdullaheryetkin.com` | ~400-500 TL/yıl; para olunca |
+
+### Adres değiştiğinde ne yapılır
+
+`SITE.url` artık ortam değişkeninden okunuyor. Yeni adrese geçmek için **kod
+değiştirmeye gerek yok**:
+
+Cloudflare → Worker → **Settings → Variables** → ekle:
+
+```
+PUBLIC_SITE_URL = https://eryetkin.is-a.dev
+```
+
+Sonra son deploy'u **Retry** et. Canonical, og:image, sitemap ve RSS
+kendiliğinden yeni adrese döner. `public/robots.txt` içindeki sitemap satırını
+da elle güncelle.

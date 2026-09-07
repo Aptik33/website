@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://abdullaheryetkin.com/sitemap-index.xml
+# Domain değişince buradaki adresi de güncelle.
+Sitemap: https://website.abdullaheryetkin033.workers.dev/sitemap-index.xml
