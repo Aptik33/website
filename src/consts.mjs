@@ -61,9 +61,9 @@ export const NAV = [
  * `aktif` değerini true yap. false olduğu sürece yorum bloğu hiç render edilmez.
  */
 export const YORUMLAR = {
-  aktif: false,
-  repo: 'KULLANICI/REPO',
-  repoId: '',
+  aktif: true,
+  repo: 'Aptik33/website',
+  repoId: 'R_kgDOURKElQ',
   kategori: 'Announcements',
-  kategoriId: '',
+  kategoriId: 'DIC_kwDOURKElc4DFE4c',
 };

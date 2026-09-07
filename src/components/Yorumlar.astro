@@ -1,0 +1,89 @@
+---
+import { YORUMLAR } from '../consts.mjs';
+
+/**
+ * Yorumlar — giscus (GitHub Discussions).
+ *
+ * Veritabanı yok: bütün yorumlar Aptik33/website deposunun Discussions
+ * bölümünde durur. Takip yok, reklam yok, ücretsiz.
+ *
+ * TEMA SENKRONU
+ * giscus bir <iframe> içinde çalışır ve kendi temasını taşır. Script
+ * etiketindeki `data-theme` statik olduğu için, kullanıcı açık temadaysa
+ * giscus koyu açılırdı. Bu yüzden iki noktada postMessage gönderiyoruz:
+ *   1. iframe "hazırım" dediğinde (ilk yükleme)
+ *   2. tema anahtarına her basıldığında (ThemeToggle özel olay yayar)
+ */
+---
+
+{
+  YORUMLAR.aktif && (
+    <section class="mt-16 max-w-3xl" aria-labelledby="yorumlar-baslik" data-reveal>
+      <div class="flex items-end justify-between gap-4 mb-4">
+        <h2 id="yorumlar-baslik" class="text-xl">Yorumlar</h2>
+        <a
+          href={`https://github.com/${YORUMLAR.repo}/discussions`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="font-[var(--font-mono)] text-xs transition-colors hover:text-[var(--accent)]"
+          style="color: var(--text-soluk);"
+        >
+          GitHub'da aç ↗
+        </a>
+      </div>
+
+      <p class="text-sm mb-5" style="color: var(--text-muted);">
+        Yorumlar GitHub Discussions üzerinde tutulur. Yazmak için GitHub hesabı gerekir;
+        düzeltme, itiraz ve soru her zaman açığım.
+      </p>
+
+      <div class="kutu p-4 sm:p-5">
+        <div class="giscus" />
+      </div>
+
+      <script
+        is:inline
+        src="https://giscus.app/client.js"
+        data-repo={YORUMLAR.repo}
+        data-repo-id={YORUMLAR.repoId}
+        data-category={YORUMLAR.kategori}
+        data-category-id={YORUMLAR.kategoriId}
+        data-mapping="pathname"
+        data-strict="1"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="dark_dimmed"
+        data-lang="tr"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async
+      />
+    </section>
+  )
+}
+
+<script>
+  const GISCUS_ORIGIN = 'https://giscus.app';
+
+  /** Site teması → giscus tema adı. */
+  const giscusTema = () =>
+    document.documentElement.dataset.theme === 'light' ? 'light' : 'dark_dimmed';
+
+  function temayiGonder() {
+    const cerceve = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
+    cerceve?.contentWindow?.postMessage(
+      { giscus: { setConfig: { theme: giscusTema() } } },
+      GISCUS_ORIGIN
+    );
+  }
+
+  // 1. iframe hazır olduğunda: giscus yüklenince kendini haber verir.
+  window.addEventListener('message', (e) => {
+    if (e.origin !== GISCUS_ORIGIN) return;
+    if (e.data && typeof e.data === 'object' && 'giscus' in e.data) temayiGonder();
+  });
+
+  // 2. Tema anahtarına basıldığında (ThemeToggle bu olayı yayar).
+  document.addEventListener('tema-degisti', temayiGonder);
+</script>

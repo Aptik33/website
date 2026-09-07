@@ -1,5 +1,4 @@
 ---
-import { YORUMLAR } from '../consts.mjs';
 ---
 
 <button
@@ -7,7 +6,6 @@ import { YORUMLAR } from '../consts.mjs';
   id="tema-btn"
   class="grid place-items-center w-9 h-9 rounded-[var(--radius-buton)] border transition-colors hover:bg-[var(--surface-2)] hover:border-[var(--border-parlak)]"
   aria-label="Temayı değiştir"
-  data-yorumlar={String(YORUMLAR.aktif)}
 >
   <svg class="tema-ay" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -25,7 +23,6 @@ import { YORUMLAR } from '../consts.mjs';
 
 <script>
   const temaBtn = document.getElementById('tema-btn');
-  const yorumlarAktif = temaBtn?.dataset.yorumlar === 'true';
 
   temaBtn?.addEventListener('click', () => {
     const kok = document.documentElement;
@@ -40,13 +37,8 @@ import { YORUMLAR } from '../consts.mjs';
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', yeni === 'dark' ? '#08090c' : '#fbfbf9');
 
-    // Giscus iframe'i kendi temasını taşır; postMessage ile senkron tutulur.
-    if (yorumlarAktif) {
-      const cerceve = document.querySelector<HTMLIFrameElement>('iframe.giscus-frame');
-      cerceve?.contentWindow?.postMessage(
-        { giscus: { setConfig: { theme: yeni === 'dark' ? 'dark_dimmed' : 'light' } } },
-        'https://giscus.app'
-      );
-    }
+    // Temaya bağlı diğer bileşenler (ör. giscus iframe'i) bunu dinler.
+    document.dispatchEvent(new CustomEvent('tema-degisti', { detail: yeni }));
+
   });
 </script>
