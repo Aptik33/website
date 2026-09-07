@@ -4,18 +4,23 @@ import SayfaBasligi from '../components/SayfaBasligi.astro';
 import { SITE } from '../consts.mjs';
 
 /**
- * Web3Forms anahtarı ortam değişkeninden gelir.
- * Kök dizinde .env dosyası oluştur:  PUBLIC_WEB3FORMS_KEY=xxxx
- * Anahtar yoksa form gönderim yerine bir uyarı gösterir; sessizce
- * çalışmayan bir form canlıya çıkmasın diye böyle.
+ * Web3Forms erişim anahtarı.
+ *
+ * Bu anahtar GİZLİ DEĞİL — Web3Forms'un kendi paneli "This is a public key,
+ * you can use it in client side code" diyor. Zaten aşağıdaki formun HTML
+ * kaynağında görünüyor, dolayısıyla repoda durması ek bir risk yaratmıyor.
+ *
+ * Yine de ortam değişkeniyle ezilebilir; anahtarı değiştirmek istersen
+ * commit atmadan Cloudflare → Settings → Variables üzerinden geçebilirsin.
  */
-const formAnahtari = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+const VARSAYILAN_ANAHTAR = '7df0a06d-d9bc-46b9-9652-31865ef69e7f';
+
+const formAnahtari =
+  (import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined) || VARSAYILAN_ANAHTAR;
 const formHazir = Boolean(formAnahtari);
 
 if (!formHazir) {
-  console.warn(
-    '[iletisim] PUBLIC_WEB3FORMS_KEY tanımlı değil — iletişim formu devre dışı, e-posta bağlantısı gösteriliyor.'
-  );
+  console.warn('[iletisim] Web3Forms anahtarı yok — form devre dışı, e-posta bağlantısı gösteriliyor.');
 }
 ---
 
@@ -48,7 +53,8 @@ if (!formHazir) {
       hidden={!formHazir}
     >
       <input type="hidden" name="access_key" value={formAnahtari} />
-      <input type="hidden" name="subject" value="Siteden yeni mesaj" />
+      <input type="hidden" name="subject" value="abdullaheryetkin.com.tr — yeni mesaj" />
+      <input type="hidden" name="from_name" value="Kişisel site iletişim formu" />
       <input type="checkbox" name="botcheck" class="hidden" style="display:none" tabindex="-1" autocomplete="off" />
 
       <div>
