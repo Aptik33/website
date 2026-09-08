@@ -116,7 +116,7 @@ Açıklama kutusuna ne yaptığını yaz (ör. "Excel otomasyonu yazısı eklend
 ### Adım 6 — Bekle
 
 ~90 saniye sonra yazın sitede. Kontrol:
-https://website.abdullaheryetkin033.workers.dev/blog
+https://abdullaheryetkin.com.tr/blog
 
 ---
 
@@ -225,27 +225,20 @@ https://github.com/Aptik33/website/commits/main
 
 ---
 
-# 8. İleride: görsel editör
-
-Şu an her şey metin dosyası. Sık yazmaya başlarsan **Keystatic** diye bir
-şey eklenebilir: sitede `/keystatic` adresinde form gibi bir panel açılır,
-başlık/özet/içerik kutulara yazılır, dosyaları arkada kendisi hazırlar.
-
-Şimdilik gerek yok — ayda bir yazı için GitHub arayüzü fazlasıyla yeterli
-ve daha az şey bozulur. İhtiyaç olursa söyle.
-
----
-
 ## Özet
 
 | ne yapmak istiyorsun | nereye git |
 |---|---|
-| Yeni yazı | `src/content/yazilar` → Add file |
-| Yeni proje | `src/content/projeler` → Add file |
-| Düzenle | Dosyaya tıkla → ✏️ kalem |
-| Sil | Dosyaya tıkla → 🗑️ çöp kutusu |
-| Gizle (silmeden) | `taslak: true` yap |
+| **Yeni yazı / proje / kaynak** | **app.pagescms.org → Add an entry** |
+| **Düzenle** | **Panelde listeden tıkla → Save** |
+| **Gizle** | **Panelde "Taslak" anahtarını aç** |
+| Sayfa metni düzelt | GitHub → dosyaya tıkla → ✏️ |
+| "Şu an" sayfası | GitHub → `src/pages/simdi.astro` |
 | Sorun mu var | Cloudflare → Deployments |
 
-**Site adresi:** https://website.abdullaheryetkin033.workers.dev
-**Depo:** https://github.com/Aptik33/website
+| | adres |
+|---|---|
+| **Site** | https://abdullaheryetkin.com.tr |
+| **Panel** | https://app.pagescms.org |
+| Depo | https://github.com/Aptik33/website |
+| Yayın durumu | Cloudflare → Workers & Pages → website |
