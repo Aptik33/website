@@ -9,15 +9,11 @@ oneCikan: true
 metrikler:
   - etiket: "Dışarı çıkan veri"
     deger: "0 bayt"
-  - etiket: "Ortalama analiz süresi"
-    deger: "8–14 sn"
-  - etiket: "Geçerli JSON oranı"
-    deger: "~%90"
   - etiket: "Bulut API bağımlılığı"
     deger: "Yok"
 ilgiliYazilar: ["yerel-llm-vram-hiz-kalite-takasi"]
 ilgiliKaynaklar: ["yerel-ai-baslangic-paketi"]
-sinirlar: "Uygulama kullanıcının makinesindeki VRAM'e tamamen bağımlı: 8 GB'ın altında görsel model ya hiç yüklenmiyor ya da sistem belleğine taşıp analizi 40 saniyenin üzerine çıkarıyor. Model çıktısı hâlâ tam olarak deterministik değil — on denemede yaklaşık bir tanesi şemaya uymuyor ve yeniden deneme gerektiriyor; bunu prompt ile azalttım ama sıfırlayamadım. Görsel dil modelleri görmedikleri şeyi betimleme eğilimini tamamen bırakmıyor, dolayısıyla çıktının doğruluğunu uygulama garanti edemiyor, yalnızca biçimini garanti ediyor. İlk açılışta model belleğe yüklenirken 20–30 saniyelik bir bekleme var ve bunu gizleyecek bir ön yükleme stratejisi kuramadım. Uygulama paketi model dosyasını içermediği için kullanıcının Ollama'yı ayrıca kurması gerekiyor; tek tıkla kurulum hedefine ulaşamadım."
+sinirlar: "Uygulama kullanıcının makinesindeki VRAM'e tamamen bağımlı: yetersiz bellekte görsel model ya hiç yüklenmiyor ya da sistem belleğine taşıp analizi belirgin şekilde yavaşlatıyor. Model çıktısı hâlâ deterministik değil — bazen şemaya uymuyor ve yeniden deneme gerektiriyor; bunu prompt ile azalttım ama sıfırlayamadım ve oranını ölçmedim. Görsel dil modelleri görmedikleri şeyi betimleme eğilimini tamamen bırakmıyor, dolayısıyla çıktının doğruluğunu uygulama garanti edemiyor, yalnızca biçimini garanti ediyor. İlk açılışta model belleğe yüklenirken 20–30 saniyelik bir bekleme var ve bunu gizleyecek bir ön yükleme stratejisi kuramadım. Uygulama paketi model dosyasını içermediği için kullanıcının Ollama'yı ayrıca kurması gerekiyor; tek tıkla kurulum hedefine ulaşamadım."
 ---
 
 ## Problem
@@ -61,7 +57,7 @@ değil, tekrarlanabilirlik için. Aynı girdiye aynı çıktıyı vermesi, çık
 programla işleyeceğin durumda şart.
 
 **2. Sistem promptunda şemayı göstermek.** "JSON döndür" demek ile istenen şemayı
-olduğu gibi yazmak arasında ölçülebilir fark var.
+olduğu gibi yazmak arasında gözle görülür fark var. (Bunu da ölçmedim — izlenim.)
 
 ```
 Sen bir veri çıkarma modülüsün. Kullanıcıyla sohbet etmezsin.
@@ -74,9 +70,9 @@ Sen bir veri çıkarma modülüsün. Kullanıcıyla sohbet etmezsin.
 olasılığı artıran bir önlem. Gelen çıktı şema doğrulamasından geçmezse kullanıcıya
 gösterilmiyor; uygulama sessizce bir kez daha deniyor.
 
-Üçüncü katman olmadan ilk ikisi işe yaramaz. Bunu deneme yanılmayla öğrendim: bir
-modelin %90 oranında doğru format üretmesi, %10 oranında uygulamanı çökertmesi
-demek.
+Üçüncü katman olmadan ilk ikisi işe yaramaz. Bunu deneme yanılmayla öğrendim: model
+çoğu zaman doğru format üretiyor, ama "çoğu zaman" bir uygulama için yeterli değil.
+Her başarısız çıktı, doğrulama katmanı yoksa çökme demek.
 
 ### Belirsizliği görünür kılmak
 
@@ -89,8 +85,12 @@ sunar. Bu tür bir uygulamada en tehlikeli şey de bu.
 ## Sonuç
 
 Uygulama uçtan uca çalıştı. Görüntü seçiliyor, yerel modelden geçiyor, şemaya uyan
-JSON dönüyor, arayüzde gösteriliyor. Tipik analiz süresi 8–14 saniye ve bu sürenin
-tamamı kullanıcının kendi makinesinde geçiyor.
+JSON dönüyor, arayüzde gösteriliyor. Analizin tamamı kullanıcının kendi makinesinde
+geçiyor; hiçbir aşamada ağa çıkılmıyor.
+
+**Süre ve başarı oranı ölçülmedi.** Analiz "birkaç saniye" sürüyor ama kronometreyle
+tutmadım; şema doğrulamasından geçme oranını da saymadım. Bu proje üzerinde tekrar
+çalıştığımda bu iki sayıyı ölçüp buraya koyacağım. Tahmini rakam yazmıyorum.
 
 ## Ne öğrendim
 

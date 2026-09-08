@@ -1,7 +1,8 @@
 ---
-baslik: "Kendi Bilgisayarımda Yerel LLM: VRAM, Hız ve Kalite Takası"
-ozet: "7B ve 8B modelleri farklı niceleme seviyelerinde çalıştırıp token hızı, bellek kullanımı ve çıktı tutarlılığını ölçtüm. Sonuç: sınırlayıcı şey model boyutu değil, VRAM'e sığıp sığmaması."
+baslik: "Yerel LLM Ölçümü: Kurduğum Test Düzeneği"
+ozet: "Hangi yerel modelin işimi göreceğini tahminle değil ölçümle bulmak için kurduğum test düzeneği: neyi, nasıl, hangi kombinasyonlarda ölçeceğim. Sonuç tablosu ölçümler bitince dolacak."
 yayinTarihi: 2026-08-31
+guncellemeTarihi: 2026-09-08
 kategori: "ai"
 etiketler: ["Yerel LLM", "Ollama", "VRAM", "Ölçüm", "Donanım"]
 kaynakDosya: "yerel-ai-baslangic-paketi"
@@ -14,72 +15,71 @@ Yerel model çalıştırmakla ilgili en çok duyulan tavsiye şu: "8 GB VRAM'in 
 Bu üç değişken birbirinden bağımsız değil. Aynı 8 GB kartta bir modeli üç farklı
 şekilde çalıştırabilirsin ve üçünde de tamamen farklı bir deneyim alırsın.
 
-## Ne ölçtüm
+İnternette bu konuda çok fikir var, az ölçüm. Ben de kendi makinemde ölçmeye karar
+verdim. Bu yazı **sonuçları değil, kurduğum test düzeneğini** anlatıyor.
+
+> **Bu yazı henüz sonuç içermiyor.** Aşağıdaki tablo boş; ölçümleri yaptıkça
+> dolduracağım ve güncelleme tarihini değiştireceğim. Tahmini rakam yazmıyorum.
+
+## Ne ölçeceğim
 
 Aynı beş promptu — bir özetleme, bir sınıflandırma, iki JSON çıkarma, bir uzun
-metin yeniden yazma — farklı model ve niceleme kombinasyonlarında çalıştırdım.
-Her kombinasyon için baktığım üç şey:
+metin yeniden yazma — farklı model ve niceleme kombinasyonlarında çalıştıracağım.
+Her kombinasyon için üç şeye bakacağım:
 
 1. **Token/saniye** — üretim hızı
-2. **Bellek** — modelin tamamı VRAM'e sığdı mı, yoksa taştı mı
+2. **Bellek** — modelin tamamı VRAM'e sığıyor mu, yoksa taşıyor mu
 3. **Format tutarlılığı** — JSON isteyen üç promptta kaç denemede geçerli JSON döndü
 
-Üçüncüsü benim için en önemlisiydi, çünkü model çıktısını bir uygulamaya
-besleyeceksen "genelde doğru" yeterli değil.
+Üçüncüsü benim için en önemlisi, çünkü model çıktısını bir uygulamaya besleyeceksen
+"genelde doğru" yeterli değil. Bellek `nvidia-smi` ile, token hızı Ollama'nın kendi
+çıktısıyla, format tutarlılığı basit bir `json.loads()` döngüsüyle ölçülecek.
+
+Her kombinasyon en az 10 kez tekrarlanacak; tek ölçüm gürültüden ibaret olur.
 
 ## Sonuçlar
 
 | kurulum | token/sn | VRAM'e sığdı mı | geçerli JSON (10 deneme) |
 |---|---|---|---|
-| 8B · Q4_K_M · 4k bağlam | ~38 | evet | 9 / 10 |
-| 8B · Q4_K_M · 16k bağlam | ~9 | **hayır, taştı** | 9 / 10 |
-| 8B · Q8_0 · 4k bağlam | ~11 | **hayır, taştı** | 10 / 10 |
-| 7B · Q4_K_M · 4k bağlam | ~44 | evet | 8 / 10 |
-| 3B · Q4_K_M · 4k bağlam | ~72 | evet | 5 / 10 |
+| 8B · Q4_K_M · 4k bağlam | — | — | — |
+| 8B · Q4_K_M · 16k bağlam | — | — | — |
+| 8B · Q8_0 · 4k bağlam | — | — | — |
+| 7B · Q4_K_M · 4k bağlam | — | — | — |
+| 3B · Q4_K_M · 4k bağlam | — | — | — |
 
-Değerler kendi makinemde, tek kullanıcıyla ve boş bağlamla ölçüldü. Mutlak
-rakamlara değil, aralarındaki farka bak.
+**Ölçüm bekliyor.** Tablo doldukça bu satır kalkacak.
 
-## Buradan çıkan üç sonuç
+## Test edeceğim üç varsayım
+
+Bunlar beklentilerim — ölçümün doğrulaması ya da çürütmesi gereken şeyler. Ölçmeden
+önce yazıyorum ki sonradan "zaten böyle diyordum" diyemeyeyim.
 
 ### 1. Asıl uçurum model boyutunda değil, taşmada
 
-8B modelin 4k bağlamla 38 token/sn, 16k bağlamla 9 token/sn vermesi dikkat çekici.
-Model aynı, niceleme aynı. Değişen tek şey bağlam penceresinin VRAM'de yer
-kaplaması ve modelin bir kısmının sistem belleğine taşması.
+Beklentim: aynı modeli 4k yerine 16k bağlamla çalıştırdığımda hızın **kademeli
+değil, uçurum gibi** düşmesi. Sebebi model büyümesi değil, bağlam penceresinin
+VRAM'de yer kaplayıp modelin bir kısmını sistem belleğine itmesi.
 
-Yani **hız kaybının sebebi modelin büyümesi değil, VRAM sınırını aşman.** Sınırın
-altında kaldığın sürece boyut arttıkça hız yumuşak biçimde düşüyor; sınırı aştığın
-anda uçurumdan düşüyor.
+Doğruysa pratik karşılığı şu: bağlam penceresini "ne olur ne olmaz" diye 16k'ya
+çekmek bedava değil, gerçekten uzun belge işlemiyorsan 4k'da kalmalısın.
 
-Pratik karşılığı: bağlam penceresini "ne olur ne olmaz" diye 16k'ya çekmek bedava
-değil. Gerçekten uzun belge işlemiyorsan 4k'da kal.
+### 2. Q8, yapılandırılmış çıktıda anlamlı fark yaratır
 
-### 2. Q8 kaliteyi artırıyor ama bedeli ağır
+Beklentim: Q8_0'ın geçerli JSON oranını Q4_K_M'nin üzerine çıkarması. Küçük bir fark
+bile üretim akışında önemli — %10 hata, her onuncu kayıtta elle müdahale demek.
 
-Q8_0 kurulumu 10 denemenin 10'unda geçerli JSON döndürdü — Q4_K_M'de 9/10. Küçük
-bir fark gibi görünüyor ama bir üretim akışında %10 hata oranı, her onuncu kayıtta
-elle müdahale demek.
+Buna karşılık 8 GB kartta Q8 muhtemelen sığmayacak ve hız düşecek. Asıl merak
+ettiğim, bu takasın hangi tarafının ağır bastığı.
 
-Buna karşılık hız 38'den 11 token/sn'ye düşüyor, çünkü 8 GB kartta Q8 sığmıyor.
+### 3. 3B modeller şemaya uymakta zorlanır
 
-Karar bence şöyle: **çıktıyı insan okuyacaksa Q4 yeterli. Çıktıyı program
-işleyecekse Q8'in getirisi gerçek** — ama o zaman ya bağlamı kısmak ya da daha
-küçük bir modeli Q8'de çalıştırmak gerekiyor.
-
-### 3. 3B modelleri yapılandırılmış çıktı için kullanma
-
-72 token/sn cazip görünüyor. Ama 10 denemenin sadece 5'inde geçerli JSON döndü.
-Kalan 5'te ya kod bloğu işareti ekledi, ya JSON'dan önce bir cümle yazdı, ya da
-şemada olmayan alan uydurdu.
-
-3B modeller kısa özetleme ve sınıflandırmada işe yarıyor. Şemaya uyması gereken
-çıktıda ise hızın hiçbir anlamı yok, çünkü her iki denemeden birini atmak zorunda
-kalıyorsun.
+Beklentim: 3B'nin hız olarak açık ara önde, format tutarlılığında belirgin şekilde
+geride olması. Öyleyse hızın yapılandırılmış çıktıda anlamı kalmıyor; her iki
+denemeden birini atıyorsan kazandığın süreyi geri veriyorsun.
 
 ## Prompt tarafında en çok işe yarayan şey
 
-Ölçtüğüm bütün müdahaleler içinde en net kazanç, modele **boş dönme izni** vermek oldu:
+Ölçümleri henüz yapmadım. Ama günlük kullanımda en çok işe yaradığını **gözlemlediğim** müdahale, modele **boş dönme izni** vermek:
 
 ```
 Sorunun cevabını verilen bağlamda bulamıyorsan yalnızca şunu yaz: BILGI_YOK
@@ -87,20 +87,21 @@ Tahmin yürütme, genel bilgiden cevap üretme.
 ```
 
 Bu tek cümle, bağlamda olmayan bir bilgi sorulduğunda modelin uydurma eğilimini
-gözle görülür biçimde düşürdü. Tamamen bitirmedi — hiçbir prompt bitirmiyor — ama
+azaltıyor gibi görünüyor. Tamamen bitirmiyor — hiçbir prompt bitirmiyor — ama
 "bilmiyorum" bir seçenek olarak sunulduğunda model onu kullanıyor.
 
-İkinci en işe yarayan: **şemayı prompt içinde göstermek.** "JSON döndür" demek ile
-istenen şemayı olduğu gibi yazmak arasında belirgin fark var.
+İkinci sırada: **şemayı prompt içinde göstermek.** "JSON döndür" demek ile istenen
+şemayı olduğu gibi yazmak arasında fark var gibi duruyor.
 
-## Ne ölçmedim, neyi bilmiyorum
+Altını çiziyorum: **bu ikisi izlenim, ölçüm değil.** Format tutarlılığı testi
+bittiğinde sayıyla karşılaştıracağım; yanılmış olabilirim.
 
-Dürüst olmak gerekirse bu ölçümün ciddi sınırları var:
+## Bu ölçümün baştan bilinen sınırları
 
 - **Tek makine.** Farklı GPU, farklı sürücü, farklı işletim sisteminde sonuçlar
-  değişir. Buradaki rakamları kendi donanımın için geçerli sayma.
+  değişir. Çıkacak rakamları kendi donanımın için geçerli sayma.
 - **10 deneme az.** Format tutarlılığı için istatistiksel olarak zayıf bir örneklem.
-  Eğilimi gösteriyor, kesin oran vermiyor.
+  Eğilim gösterir, kesin oran vermez.
 - **Çıktı kalitesini ölçmedim, formatı ölçtüm.** Geçerli JSON dönmesi, içindeki
   bilginin doğru olduğu anlamına gelmiyor. Bu çok daha zor bir ölçüm ve henüz
   düzgün bir yöntemim yok.
@@ -108,12 +109,14 @@ Dürüst olmak gerekirse bu ölçümün ciddi sınırları var:
   aynı boyuttaki Llama'dan daha tutarlı olduğu yönünde ama bu bir ölçüm değil,
   izlenim. Öyle olduğunu iddia etmiyorum.
 
-## Sonuç
+## Şimdilik çalıştığım sıra
 
-Yerel model kurarken sıralamam şu: önce modelin VRAM'e **sığmasını** garanti et,
+Ölçüm bitene kadar izlediğim sıra şu: önce modelin VRAM'e **sığmasını** garanti et,
 sonra niceleme seviyesini kullanım amacına göre seç, en son parametre boyutunu
-büyütmeyi düşün. Çoğu insan bu sırayı tersten deniyor ve "yerel modeller yavaş"
-sonucuna varıyor — halbuki yavaşlığın sebebi modelin büyüklüğü değil, taşma.
+büyütmeyi düşün.
+
+Bunun doğru sıra olup olmadığını da ölçüm gösterecek. Şu an sadece bir çalışma
+hipotezi; sonuçlar geldiğinde bu bölümü de güncelleyeceğim.
 
 Kullandığım Modelfile şablonlarını, sistem promptlarını ve VRAM'e göre model seçim
 tablosunu aşağıdaki JSON dosyasında topladım. Her ayarın yanında neden öyle

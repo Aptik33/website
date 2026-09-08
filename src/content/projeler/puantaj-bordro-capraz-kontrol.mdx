@@ -1,20 +1,18 @@
 ---
 baslik: "Puantaj – Bordro Çapraz Kontrol Aracı"
-ozet: "Şantiye puantajı ile bordro çıktısını satır satır karşılaştırıp gün, fazla mesai ve personel eşleşmesi tutarsızlıklarını yakalayan Python aracı. Ay sonu kontrolünü saatlerden dakikalara indirdi."
+ozet: "Puantaj ile bordro çıktısını satır satır karşılaştırıp gün, fazla mesai ve personel eşleşmesi tutarsızlıklarını yakalayan Python aracı. Dokuz kontrol kuralı, sıfır harici bağımlılık."
 tarih: 2026-08-24
 durum: "aktif"
 kategori: "muhasebe"
 stack: ["Python 3.10", "csv (stdlib)", "argparse", "dataclasses"]
 oneCikan: true
 metrikler:
-  - etiket: "Ay sonu kontrol süresi"
-    deger: "2–3 sa → ~10 dk"
   - etiket: "Otomatik kontrol"
     deger: "9 kural"
+  - etiket: "200 personelde çalışma"
+    deger: "0,13 sn"
   - etiket: "Harici bağımlılık"
     deger: "0"
-  - etiket: "Kapsanan personel"
-    deger: "80+"
 ilgiliYazilar: ["excel-birakmadan-kontrolu-pythona-devretmek"]
 ilgiliKaynaklar: ["puantaj-kontrol-paketi"]
 sinirlar: "Araç mevzuat bilmiyor: asgari ücret, SGK tavanı, vergi dilimi ve teşvik hesapları tamamen kapsam dışı. Eksik gün kodunun dolu olup olmadığına bakıyor ama doğru kod olup olmadığını denetlemiyor. Ay içinde giriş veya çıkışı olan personelde kıst ücret hesabı yapmadığı için beklenen gün farklarını da uyarı olarak listeliyor; bu yanlış pozitifleri eleme işi hâlâ bende. Girdi olarak temiz CSV bekliyor, birleştirilmiş hücre veya serbest not içeren ham Excel dosyalarını okuyamıyor — dosyayı hazırlamak manuel bir adım olarak duruyor. En önemlisi: araç karar vermiyor, temiz çıkması bordronun doğru olduğu anlamına gelmiyor."
@@ -81,9 +79,16 @@ HATA   E07   1005    Elif A.         Net 31.200,00 > Brut 30.000,00
 UYARI  E03   1003    Sema D.         Puantaj 30 gun, bordro SGK 28 gun
 ```
 
-Ay sonu kontrolü ortalama 2–3 saatten yaklaşık 10 dakikaya indi. Ama asıl kazanç
-süre değil: eşleşme hatalarını artık hiç kaçırmıyorum. Süre ölçülebilir olduğu için
-öne çıkıyor, önemli olan diğeri.
+200 personellik sentetik veri üzerinde çalışma süresi **0,13 saniye** — sürenin
+neredeyse tamamı Python'un açılışından geliyor, karşılaştırmanın kendisi ölçülemeyecek
+kadar kısa. 6 kişilik örnek veriyle de aynı süre çıkıyor.
+
+**Kazandırdığı süreyi henüz ölçmedim.** Elle yaptığım kontrolün ne kadar sürdüğünü
+kronometreyle tutmadım; tahmin yazmak yerine boş bırakıyorum. Bir sonraki ay sonunda
+ölçüp buraya yazacağım.
+
+Ölçmediğim ama gözlemlediğim şey şu: eşleşme hatalarını — bir listede olup diğerinde
+olmayan personeli — artık kaçırmıyorum. Bu bir izlenim, ölçüm değil.
 
 Çıkış kodu hata varsa `1` döndüğü için toplu çalıştırmaya uygun — şu an üzerinde
 çalıştığım şey de bu: klasördeki bütün şantiye dosya çiftlerini gezip tek bir özet
