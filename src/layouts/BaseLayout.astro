@@ -43,18 +43,6 @@ const ogGorsel = new URL(ogYol ?? '/og/varsayilan.png', Astro.site).href;
  */
 const googleDogrulama = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as string | undefined;
 
-/**
- * Cloudflare Web Analytics.
- *
- * Cloudflare proxy'li sitelere beacon'ı kendisi enjekte edebiliyor ama
- * Worker + statik varlık kurulumunda bu her zaman çalışmıyor. Elle
- * eklemek garantili yol: Cloudflare → Web Analytics → Manage site →
- * verdiği token'ı PUBLIC_CF_ANALYTICS_TOKEN olarak tanımla.
- *
- * Çerez kullanmıyor, kişisel veri toplamıyor; KVKK/GDPR banner'ı
- * gerektirmiyor. Beacon ~6 KB ve defer ile yükleniyor.
- */
-const analitikToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined;
 ---
 
 <!doctype html>
@@ -93,6 +81,11 @@ const analitikToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | unde
 
     {googleDogrulama && <meta name="google-site-verification" content={googleDogrulama} />}
 
+    {/*
+      Cloudflare Web Analytics beacon'ı BURAYA EKLENMİYOR — Cloudflare onu
+      uç sunucuda, yalnızca gerçek tarayıcı isteklerine enjekte ediyor.
+      Elle eklersek çift sayım olur. (curl ile bakınca görünmemesi normal.)
+    */}
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <meta name="theme-color" content="#08090c" />
     <meta name="generator" content={Astro.generator} />
@@ -139,16 +132,5 @@ const analitikToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | unde
     </main>
 
     <Footer />
-
-    {
-      analitikToken && (
-        <script
-          is:inline
-          defer
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon={JSON.stringify({ token: analitikToken })}
-        />
-      )
-    }
   </body>
 </html>

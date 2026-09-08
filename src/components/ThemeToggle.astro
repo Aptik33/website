@@ -22,23 +22,48 @@
 </style>
 
 <script>
+  /**
+   * Tema değiştirme — INP için optimize edilmiş.
+   *
+   * SORUN: Cloudflare Web Analytics `#tema-btn` için INP 224 ms ölçtü
+   * (Google'ın "iyi" eşiği 200 ms). Sebep: data-theme değişince bütün CSS
+   * değişkenleri geçersizleşiyor ve sayfa baştan boyanıyor — üstelik bu
+   * sayfada backdrop-filter, bulanık ışık küreleri ve parazit katmanı gibi
+   * pahalı efektler var.
+   *
+   * ÇÖZÜM: Etkileşimin bloklayan kısmını en aza indir. Yalnızca görsel
+   * değişikliği hemen yap; localStorage yazma (senkron ve yavaş olabilir),
+   * meta güncelleme ve olay yayma işlerini boyamadan SONRAYA ertele.
+   */
   const temaBtn = document.getElementById('tema-btn');
+
+  /**
+   * Boyamadan sonra çalıştır — etkileşimi bloklamasın.
+   *
+   * requestAnimationFrame yerine düz setTimeout: sekme arka plandayken
+   * rAF tamamen duruyor ve tercih localStorage'a hiç yazılmayabiliyor.
+   * setTimeout arka planda kısılıyor ama çalışıyor.
+   */
+  const boyamadanSonra = (is: () => void) => setTimeout(is, 0);
 
   temaBtn?.addEventListener('click', () => {
     const kok = document.documentElement;
     const yeni = kok.dataset.theme === 'dark' ? 'light' : 'dark';
+
+    // Tek bloklayan iş: görsel değişiklik.
     kok.dataset.theme = yeni;
 
-    try {
-      localStorage.setItem('tema', yeni);
-    } catch {}
+    boyamadanSonra(() => {
+      try {
+        localStorage.setItem('tema', yeni);
+      } catch {}
 
-    document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute('content', yeni === 'dark' ? '#08090c' : '#fbfbf9');
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute('content', yeni === 'dark' ? '#08090c' : '#fbfbf9');
 
-    // Temaya bağlı diğer bileşenler (ör. giscus iframe'i) bunu dinler.
-    document.dispatchEvent(new CustomEvent('tema-degisti', { detail: yeni }));
-
+      // Temaya bağlı diğer bileşenler (ör. giscus iframe'i) bunu dinler.
+      document.dispatchEvent(new CustomEvent('tema-degisti', { detail: yeni }));
+    });
   });
 </script>
