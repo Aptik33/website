@@ -1,0 +1,104 @@
+name: Haftalık site denetimi
+
+# Her pazartesi 07:00 (TR saati) çalışır.
+# GitHub cron UTC kullanır: 04:00 UTC = 07:00 TR.
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch: # elle de çalıştırılabilsin
+
+permissions:
+  contents: read
+  issues: write # sorun bulunursa issue açabilsin
+
+jobs:
+  denetim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Canlı siteyi denetle
+        id: denetim
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node scripts/site-denetimi.mjs 2>&1 | tee denetim.txt
+        env:
+          PUBLIC_SITE_URL: https://abdullaheryetkin.com.tr
+
+      - name: Bağımlılıklarda güvenlik açığı var mı
+        id: guvenlik
+        continue-on-error: true
+        run: |
+          npm ci --no-fund --no-audit
+          npm audit --audit-level=high 2>&1 | tee -a denetim.txt
+
+      - name: Build hâlâ geçiyor mu
+        id: derleme
+        continue-on-error: true
+        run: |
+          npx astro check 2>&1 | tail -5 | tee -a denetim.txt
+          npm run build 2>&1 | tail -5 | tee -a denetim.txt
+        env:
+          PUBLIC_SITE_URL: https://abdullaheryetkin.com.tr
+
+      - name: Sorun varsa issue aç
+        if: steps.denetim.outcome == 'failure' || steps.derleme.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const rapor = fs.readFileSync('denetim.txt', 'utf8').slice(0, 60000);
+            const bugun = new Date().toISOString().slice(0, 10);
+
+            // Aynı konuda açık issue varsa yenisini açma, ona yorum ekle.
+            const { data: acik } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'otomatik-denetim',
+            });
+
+            const govde = [
+              `Haftalık denetim **${bugun}** tarihinde sorun buldu.`,
+              '',
+              '```',
+              rapor,
+              '```',
+              '',
+              `[Çalışma kaydı](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+            ].join('\n');
+
+            if (acik.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: acik[0].number,
+                body: govde,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Site denetimi sorun buldu — ${bugun}`,
+                labels: ['otomatik-denetim'],
+                body: govde,
+              });
+            }
+
+      - name: Özet
+        if: always()
+        run: |
+          {
+            echo "## Haftalık site denetimi"
+            echo ''
+            echo '```'
+            cat denetim.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

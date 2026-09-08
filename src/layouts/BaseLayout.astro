@@ -42,6 +42,19 @@ const ogGorsel = new URL(ogYol ?? '/og/varsayilan.png', Astro.site).href;
  * DNS veya Cloudflare entegrasyonuyla doğrularsan buna gerek kalmaz.
  */
 const googleDogrulama = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as string | undefined;
+
+/**
+ * Cloudflare Web Analytics.
+ *
+ * Cloudflare proxy'li sitelere beacon'ı kendisi enjekte edebiliyor ama
+ * Worker + statik varlık kurulumunda bu her zaman çalışmıyor. Elle
+ * eklemek garantili yol: Cloudflare → Web Analytics → Manage site →
+ * verdiği token'ı PUBLIC_CF_ANALYTICS_TOKEN olarak tanımla.
+ *
+ * Çerez kullanmıyor, kişisel veri toplamıyor; KVKK/GDPR banner'ı
+ * gerektirmiyor. Beacon ~6 KB ve defer ile yükleniyor.
+ */
+const analitikToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN as string | undefined;
 ---
 
 <!doctype html>
@@ -126,5 +139,16 @@ const googleDogrulama = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as strin
     </main>
 
     <Footer />
+
+    {
+      analitikToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: analitikToken })}
+        />
+      )
+    }
   </body>
 </html>
