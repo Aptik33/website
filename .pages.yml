@@ -1,0 +1,347 @@
+# Pages CMS — görsel içerik paneli
+#
+# app.pagescms.org üzerinden GitHub hesabınla giriş yapınca bu dosyayı okur ve
+# aşağıdaki alanları form olarak gösterir. Kaydettiğinde doğrudan bu depoya
+# commit atar, Cloudflare da ~90 saniye içinde siteyi yeniden yayınlar.
+#
+# ÖNEMLİ: Buradaki alanlar `src/content.config.ts` içindeki Zod şemasıyla
+# birebir aynı olmalı. Panelden şemaya uymayan bir şey kaydedilirse build
+# kırılır (site eski haliyle çalışmaya devam eder ama yeni içerik yayınlanmaz).
+
+media:
+  input: public/gorsel
+  output: /gorsel
+  categories: [image]
+
+settings:
+  content:
+    merge: true
+
+content:
+  # ─────────────────────────── YAZILAR ───────────────────────────
+  - name: yazilar
+    label: Blog yazıları
+    type: collection
+    path: src/content/yazilar
+    format: yaml-frontmatter
+    filename: '{fields.baslik}.mdx'
+    view:
+      primary: baslik
+      sort: [yayinTarihi, baslik]
+      order: desc
+      fields: [baslik, kategori, yayinTarihi, taslak]
+    fields:
+      - name: baslik
+        label: Başlık
+        type: string
+        required: true
+        options: { maxlength: 80 }
+        description: En fazla 80 karakter. Sekmede ve Google sonuçlarında görünür.
+
+      - name: ozet
+        label: Özet
+        type: text
+        required: true
+        options: { minlength: 40, maxlength: 220 }
+        description: 40–220 karakter. Kartlarda ve Google sonuçlarında görünen açıklama.
+
+      - name: yayinTarihi
+        label: Yayın tarihi
+        type: date
+        required: true
+        options: { format: 'yyyy-MM-dd' }
+
+      - name: guncellemeTarihi
+        label: Güncelleme tarihi
+        type: date
+        options: { format: 'yyyy-MM-dd' }
+        description: Yazıyı sonradan düzelttiysen doldur. Sitede "Güncellendi" olarak görünür.
+
+      - name: kategori
+        label: Kategori
+        type: select
+        required: true
+        options:
+          values:
+            - { value: ai, label: Yapay Zekâ }
+            - { value: otomasyon, label: Otomasyon }
+            - { value: muhasebe, label: Muhasebe & Excel }
+            - { value: donanim, label: Donanım & Oyun }
+
+      - name: etiketler
+        label: Etiketler
+        type: string
+        list: { min: 1, max: 6 }
+        required: true
+        description: 1–6 adet. Her etiket için ayrı bir arşiv sayfası oluşur.
+
+      - name: taslak
+        label: Taslak (yayınlama)
+        type: boolean
+        default: false
+        description: Açık bırakırsan yazı sitede görünmez. Hazır olunca kapat.
+
+      - name: kaynakDosya
+        label: Bağlı kaynak dosyası
+        type: reference
+        options:
+          collection: kaynaklar
+          value: '{filename}'
+          label: '{fields.baslik}'
+        description: Bu yazıya ait indirilebilir dosya varsa seç. Zorunlu değil.
+
+      - name: body
+        label: Yazı
+        type: rich-text
+
+  # ─────────────────────────── PROJELER ───────────────────────────
+  - name: projeler
+    label: Projeler
+    type: collection
+    path: src/content/projeler
+    format: yaml-frontmatter
+    filename: '{fields.baslik}.mdx'
+    view:
+      primary: baslik
+      sort: [tarih, baslik]
+      order: desc
+      fields: [baslik, kategori, durum, tarih]
+    fields:
+      - name: baslik
+        label: Proje adı
+        type: string
+        required: true
+        options: { maxlength: 70 }
+
+      - name: ozet
+        label: Özet
+        type: text
+        required: true
+        options: { minlength: 40, maxlength: 200 }
+
+      - name: tarih
+        label: Tarih
+        type: date
+        required: true
+        options: { format: 'yyyy-MM-dd' }
+
+      - name: durum
+        label: Durum
+        type: select
+        required: true
+        options:
+          values:
+            - { value: aktif, label: Geliştiriliyor }
+            - { value: tamamlandi, label: Tamamlandı }
+            - { value: arsiv, label: Arşiv }
+
+      - name: kategori
+        label: Kategori
+        type: select
+        required: true
+        options:
+          values:
+            - { value: ai, label: Yapay Zekâ }
+            - { value: otomasyon, label: Otomasyon }
+            - { value: muhasebe, label: Muhasebe & Excel }
+            - { value: donanim, label: Donanım & Oyun }
+
+      - name: stack
+        label: Kullanılan teknolojiler
+        type: string
+        list: { min: 1 }
+        required: true
+
+      - name: repoUrl
+        label: Kaynak kod adresi
+        type: string
+        pattern:
+          regex: '^https://.+'
+          message: 'https:// ile başlamalı'
+
+      - name: demoUrl
+        label: Demo adresi
+        type: string
+        pattern:
+          regex: '^https://.+'
+          message: 'https:// ile başlamalı'
+
+      - name: oneCikan
+        label: Anasayfada öne çıkar
+        type: boolean
+        default: false
+
+      - name: metrikler
+        label: Metrikler
+        type: object
+        list: { max: 4 }
+        description: SADECE ÖLÇTÜĞÜN sayıları yaz. Ölçmediysen boş bırak.
+        fields:
+          - { name: etiket, label: Ne, type: string, required: true }
+          - { name: deger, label: Değer, type: string, required: true }
+
+      - name: sinirlar
+        label: Sınırlar ve çözemediklerim
+        type: text
+        required: true
+        options: { minlength: 40 }
+        description: ZORUNLU. Bu araç neyi çözemiyor, nerede yanılır? Yazmadan yayınlanmaz.
+
+      - name: ilgiliYazilar
+        label: İlgili yazılar
+        type: reference
+        list: true
+        options:
+          collection: yazilar
+          value: '{filename}'
+          label: '{fields.baslik}'
+
+      - name: ilgiliKaynaklar
+        label: İlgili kaynaklar
+        type: reference
+        list: true
+        options:
+          collection: kaynaklar
+          value: '{filename}'
+          label: '{fields.baslik}'
+
+      - name: body
+        label: Proje anlatımı
+        type: rich-text
+
+  # ─────────────────────────── KAYNAKLAR ───────────────────────────
+  - name: kaynaklar
+    label: İndirilebilir kaynaklar
+    type: collection
+    path: src/content/kaynaklar
+    format: yaml-frontmatter
+    filename: '{fields.baslik}.mdx'
+    view:
+      primary: baslik
+      sort: [yayinTarihi, baslik]
+      order: desc
+      fields: [baslik, kategori, surum, yayinTarihi]
+    fields:
+      - name: baslik
+        label: Kaynak adı
+        type: string
+        required: true
+        options: { maxlength: 70 }
+
+      - name: aciklama
+        label: Açıklama
+        type: text
+        required: true
+        options: { minlength: 40, maxlength: 220 }
+
+      - name: kategori
+        label: Kategori
+        type: select
+        required: true
+        options:
+          values:
+            - { value: ai, label: Yapay Zekâ }
+            - { value: otomasyon, label: Otomasyon }
+            - { value: muhasebe, label: Muhasebe & Excel }
+            - { value: donanim, label: Donanım & Oyun }
+
+      - name: dosyaAdi
+        label: Dosya adı
+        type: string
+        required: true
+        description: 'public/indir/ içindeki dosyanın tam adı. Örnek: paket-v1.zip'
+
+      - name: dosyaBoyutu
+        label: Dosya boyutu (bayt)
+        type: number
+        required: true
+        description: Dosyaya sağ tık → Özellikler → Boyut (bayt cinsinden).
+
+      - name: formatlar
+        label: Biçimler
+        type: select
+        list: { min: 1 }
+        required: true
+        options:
+          multiple: true
+          values: [xlsx, py, json, zip, md, csv]
+
+      - name: surum
+        label: Sürüm
+        type: string
+        required: true
+        pattern:
+          regex: '^\d+\.\d+\.\d+$'
+          message: 'Üç parçalı olmalı, örnek: 1.0.0'
+
+      - name: sha256
+        label: SHA-256 özeti
+        type: string
+        required: true
+        pattern:
+          regex: '^[a-f0-9]{64}$'
+          message: '64 karakterlik küçük harfli özet olmalı'
+        description: 'PowerShell: Get-FileHash dosya.zip -Algorithm SHA256'
+
+      - name: lisans
+        label: Lisans
+        type: string
+        default: MIT
+
+      - name: gereksinimler
+        label: Gereksinimler
+        type: string
+        list: true
+
+      - name: yayinTarihi
+        label: Yayın tarihi
+        type: date
+        required: true
+        options: { format: 'yyyy-MM-dd' }
+
+      - name: ilgiliYazi
+        label: Bağlı yazı
+        type: reference
+        required: true
+        options:
+          collection: yazilar
+          value: '{filename}'
+          label: '{fields.baslik}'
+        description: ZORUNLU. Her kaynak, onu anlatan bir yazıya bağlı olmalı.
+
+      - name: degisiklikGunlugu
+        label: Değişiklik günlüğü
+        type: object
+        list: { min: 1 }
+        required: true
+        fields:
+          - name: surum
+            label: Sürüm
+            type: string
+            required: true
+          - name: tarih
+            label: Tarih
+            type: date
+            required: true
+            options: { format: 'yyyy-MM-dd' }
+          - name: not
+            label: Ne değişti
+            type: text
+            required: true
+
+      - name: body
+        label: Kullanım anlatımı
+        type: rich-text
+
+  # ─────────────────────── SİTE AYARLARI ───────────────────────
+  - name: simdi
+    label: '"Şu an" sayfası'
+    type: file
+    path: src/pages/simdi.astro
+    format: code
+    fields:
+      - name: content
+        label: Sayfa kodu
+        type: code
+        options: { language: astro }
+    description: Ayda bir güncelle. Listeleri ve en üstteki tarihi değiştir.
