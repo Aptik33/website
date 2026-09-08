@@ -1,6 +1,7 @@
 ---
 import { SITE, SOSYAL } from '../consts.mjs';
 import SosyalIkon from './SosyalIkon.astro';
+import Logo from './Logo.astro';
 
 const yil = new Date().getFullYear();
 
@@ -25,12 +26,8 @@ const icLinkler = [
 
   <div class="mx-auto max-w-6xl px-5 py-12 flex flex-col sm:flex-row gap-8 sm:items-start sm:justify-between">
     <div>
-      <div class="flex items-center gap-2.5">
-        <span
-          class="grid place-items-center w-6 h-6 rounded font-[var(--font-mono)] text-xs font-bold"
-          style="background: var(--accent); color: var(--accent-contrast);"
-          aria-hidden="true">A</span
-        >
+      <div class="flex items-center gap-2">
+        <Logo boyut={26} />
         <p class="font-[var(--font-baslik)] font-semibold">{SITE.name}</p>
       </div>
       <p class="text-sm mt-3 max-w-xs" style="color: var(--text-muted);">

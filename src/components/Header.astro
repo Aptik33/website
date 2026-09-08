@@ -2,6 +2,7 @@
 import { NAV, SITE } from '../consts.mjs';
 import ThemeToggle from './ThemeToggle.astro';
 import Arama from './Arama.astro';
+import Logo from './Logo.astro';
 
 const yol = Astro.url.pathname.replace(/\.html$/, '');
 const aktif = (href: string) => yol === href || yol.startsWith(href + '/');
@@ -13,12 +14,8 @@ const aktif = (href: string) => yol === href || yol.startsWith(href + '/');
   style="background: color-mix(in srgb, var(--bg) 72%, transparent); border-color: transparent; backdrop-filter: blur(14px) saturate(160%);"
 >
   <div class="mx-auto max-w-6xl px-5 h-16 flex items-center gap-4">
-    <a href="/" class="shrink-0 group flex items-center gap-2.5">
-      <span
-        class="grid place-items-center w-7 h-7 rounded-md font-[var(--font-mono)] text-sm font-bold transition-transform group-hover:scale-105"
-        style="background: var(--accent); color: var(--accent-contrast);"
-        aria-hidden="true">A</span
-      >
+    <a href="/" class="shrink-0 group flex items-center gap-2" aria-label={`${SITE.name} — anasayfa`}>
+      <Logo boyut={30} class="transition-transform group-hover:scale-105" />
       <span class="font-[var(--font-baslik)] font-bold text-lg tracking-tight">{SITE.name}</span>
     </a>
 

@@ -1,0 +1,43 @@
+---
+/**
+ * Site markası — "Kontrol" logosu.
+ *
+ * Fikir: `A` harfinin orta çizgisi bir onay işareti. Yapılan işin karşılığı:
+ * kontrol etmek, doğrulamak. (`kontrol.py`, puantaj–bordro çapraz kontrolü.)
+ *
+ * Renkler tokendan gelir, böylece açık temada da kontrast korunur:
+ * koyu temada amber #F5A524, açık temada koyulaştırılmış #A2650B.
+ *
+ * Zemin YOK — üst barda ve footer'da doğrudan sayfa zemininin üstünde durur.
+ * Zeminli hali (favicon) `public/favicon.svg` içinde ayrı duruyor.
+ */
+interface Props {
+  boyut?: number;
+  class?: string;
+}
+const { boyut = 28, class: sinif } = Astro.props;
+---
+
+<svg
+  width={boyut}
+  height={boyut}
+  viewBox="0 0 32 32"
+  fill="none"
+  class={sinif}
+  role="img"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    d="M8.2 23.2 L15.1 8.4 h1.8 L23.8 23.2"
+    stroke="var(--accent)"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"></path>
+  <path
+    d="M11.4 17.6 l2.6 2.6 l5.2 -5.4"
+    stroke="var(--accent-2)"
+    stroke-width="2.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"></path>
+</svg>
