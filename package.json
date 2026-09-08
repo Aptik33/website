@@ -8,7 +8,8 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
-    "temiz": "rm -rf dist .astro node_modules/.astro-og-canvas"
+    "temiz": "rm -rf dist .astro node_modules/.astro-og-canvas",
+    "denetim": "node scripts/site-denetimi.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.0",
