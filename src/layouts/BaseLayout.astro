@@ -31,6 +31,17 @@ const tamBaslik = baslik === SITE.title ? baslik : `${baslik} — ${SITE.name}`;
 // Sayfaya özel PNG varsa onu, yoksa sitenin varsayılan kapağını kullan.
 // SVG'yi og:image olarak vermiyoruz — çoğu sosyal platform SVG render etmiyor.
 const ogGorsel = new URL(ogYol ?? '/og/varsayilan.png', Astro.site).href;
+
+/**
+ * Google Search Console doğrulama kodu.
+ *
+ * "HTML etiketi" yöntemini seçersen Google sana `content="..."` içinde bir kod
+ * verir. Sadece o kodu buraya koy (veya Cloudflare'de ortam değişkeni olarak
+ * tanımla), etiket kendiliğinden basılır.
+ *
+ * DNS veya Cloudflare entegrasyonuyla doğrularsan buna gerek kalmaz.
+ */
+const googleDogrulama = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION as string | undefined;
 ---
 
 <!doctype html>
@@ -66,6 +77,8 @@ const ogGorsel = new URL(ogYol ?? '/og/varsayilan.png', Astro.site).href;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {googleDogrulama && <meta name="google-site-verification" content={googleDogrulama} />}
 
     <link rel="alternate" type="application/rss+xml" title={SITE.name} href="/rss.xml" />
     <meta name="theme-color" content="#08090c" />

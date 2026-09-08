@@ -29,7 +29,11 @@ export async function getStaticPaths() {
 const { ad, yazilar } = Astro.props;
 ---
 
-<BaseLayout baslik={'#' + ad + ' etiketli yazılar'} aciklama={ad + ' konusunda yazdığım yazılar.'}>
+<BaseLayout
+  baslik={'#' + ad + ' etiketli yazılar'}
+  aciklama={`${ad} konusunda yazdığım ${yazilar.length} yazı. Şantiye muhasebesi süreçlerinin otomasyonu, Python, yerel yapay zekâ ve donanım üzerine ölçüme dayalı notlar.`}
+  noIndex={yazilar.length < 3}
+>
   <SayfaBasligi ustBaslik="Etiket" baslik={'#' + ad} aciklama={yazilar.length + ' yazı.'} />
   <div class="mx-auto max-w-6xl px-5">
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
