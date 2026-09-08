@@ -18,7 +18,7 @@ export const SITE = {
   // Üst bardaki marka kısa kalıyor, kimlik geçen yerlerde tam ad kullanılıyor.
   tamAd: 'Abdullah Eryetkin',
   unvan: 'Yazılım & Otomasyon · Yerel Yapay Zekâ',
-  konum: 'Türkiye',
+  konum: 'Mersin, Türkiye',
   locale: 'tr-TR',
   email: 'abdullaheryetkin033@gmail.com',
   github: 'https://github.com/Aptik33',
