@@ -1,22 +1,80 @@
 # Siteyi nasıl güncellerim?
 
-Bilgisayara program kurmana, terminal açmana gerek yok. **Her şeyi
-tarayıcıdan yapacaksın.** Telefondan bile olur.
+**İki yol var. Kolay olanı ilki.**
 
-Tek kural: dosyayı kaydettiğin an site kendi kendini yeniden yayınlar.
-**Yaklaşık 90 saniye sonra** değişiklik canlıda olur.
+| yol | ne zaman kullan |
+|---|---|
+| **1. Görsel panel** (Pages CMS) | Yazı/proje/kaynak ekle, düzenle, sil |
+| 2. GitHub arayüzü | Sayfa metinleri, "Şu an" sayfası, teknik dosyalar |
+
+---
+
+# YOL 1 — Görsel panel (önerilen)
+
+Form doldurup kaydediyorsun. Ne dosya adı, ne tırnak işareti, ne tarih biçimi
+düşünüyorsun. Telefondan da çalışır.
+
+## İlk kurulum — bir kere, 2 dakika
+
+1. **https://app.pagescms.org** aç
+2. **Sign in with GitHub** → giriş yap
+3. Yetki isteyecek → sadece `Aptik33/website` deposunu seç → **Authorize**
+4. Listeden `website` deposuna tıkla
+
+Bitti. Bundan sonra hep bu adresten gireceksin.
+
+## Yazı eklemek
+
+1. Sol menü → **Blog yazıları** → **Add an entry**
+2. Formu doldur:
+   - **Başlık** — en fazla 80 karakter
+   - **Özet** — 40–220 karakter (panel sayıyor, aşarsan uyarır)
+   - **Yayın tarihi** — takvimden seç
+   - **Kategori** — açılır listeden seç
+   - **Etiketler** — 1–6 adet
+   - **Taslak** — açık bırakırsan sitede görünmez
+   - **Yazı** — normal metin editörü, kalın/başlık/liste butonları var
+3. **Save**
+
+~90 saniye sonra sitede.
+
+## Düzenlemek / silmek
+
+Listeden yazıya tıkla → değiştir → **Save**.
+Silmek için sağ üstteki üç nokta → **Delete**.
+
+> **Silmek yerine "Taslak" anahtarını aç.** Yazı siteden kalkar ama durur.
+
+## Proje eklemek
+
+Aynı şekilde, **Projeler** bölümünden.
+
+İki alan zorunlu ve panel seni zorlar:
+- **Sınırlar ve çözemediklerim** — en az 40 karakter, yazmadan kaydedilmez
+- **Metrikler** — sadece **ölçtüğün** sayıları yaz, tahmin yazma
+
+## Kaynak (indirilebilir dosya) eklemek
+
+Önce dosyayı GitHub'da `public/indir/` klasörüne yükle, sonra panelden kaydını
+oluştur. SHA-256 özetini almak için PowerShell'de:
+
+```powershell
+Get-FileHash dosya.zip -Algorithm SHA256
+```
+
+Çıkan uzun kodu küçük harfe çevirip yapıştır.
+
+## Panel bir şeyi kabul etmezse
+
+İyi haber: **hata siteye ulaşmadan yakalanıyor.** Panel, sitenin kurallarını
+biliyor — kategori listeden seçiliyor, özet uzunluğu sayılıyor, sürüm biçimi
+kontrol ediliyor. Kırmızı uyarı görürsen düzelt, kaydet.
 
 ---
 
-## ⚠️ Önce şunu bil: hiçbir şeyi bozamazsın
+# YOL 2 — GitHub arayüzü
 
-Bir yeri yanlış yazarsan site **yayınlanmaz** ve **eski hali çalışmaya
-devam eder**. Ziyaretçiler bozuk bir şey görmez.
-
-Cloudflare sana kırmızı bir "build failed" gösterir, sen de gidip
-düzeltirsin. O kadar. Rahat ol, dene.
-
----
+Panelde olmayan şeyler için: sayfa metinleri, tasarım, teknik dosyalar.
 
 # 1. Yeni blog yazısı eklemek
 
