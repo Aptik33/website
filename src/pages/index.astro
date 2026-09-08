@@ -9,7 +9,7 @@ import Terminal from '../components/Terminal.astro';
 import ProfilKarti from '../components/ProfilKarti.astro';
 import { SITE, KATEGORILER } from '../consts.mjs';
 
-const projeler = (await getCollection('projeler'))
+const projeler = (await getCollection('projeler', ({ data }) => !data.taslak))
   .filter((p) => p.data.oneCikan)
   .sort((a, b) => b.data.tarih.valueOf() - a.data.tarih.valueOf())
   .slice(0, 2);

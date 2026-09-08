@@ -14,7 +14,7 @@ import { OGImageRoute } from 'astro-og-canvas';
 export const prerender = true;
 
 const yazilar = await getCollection('yazilar', ({ data }) => !data.taslak);
-const projeler = await getCollection('projeler');
+const projeler = await getCollection('projeler', ({ data }) => !data.taslak);
 const kaynaklar = await getCollection('kaynaklar');
 
 type Sayfa = { title: string; description: string };

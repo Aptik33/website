@@ -1,0 +1,86 @@
+---
+baslik: "Bordro Takip PRO — İmza Takibi ve WhatsApp Bildirimi"
+ozet: "Yüzlerce personelin maaş bordrosu imza takibini tek ekrandan yöneten, imzası eksik olanlara WhatsApp'tan otomatik bildirim gönderen React + Electron masaüstü uygulaması."
+tarih: 2025-10-20
+durum: "tamamlandi"
+kategori: "muhasebe"
+stack: ["React 19", "Electron", "electron-builder", "whatsapp-web.js", "Chart.js", "SheetJS", "jsPDF"]
+repoUrl: "https://github.com/Aptik33/bordro-imza"
+oneCikan: true
+taslak: true
+metrikler:
+  - etiket: "Yayınlanan sürüm"
+    deger: "v1.2.0"
+  - etiket: "Kurulum paketi"
+    deger: "429 MB .exe"
+ilgiliYazilar: []
+ilgiliKaynaklar: []
+sinirlar: "TASLAK — bu bölümü kendi sözlerinle doldur. Aşağıdakiler kod ve bağımlılıklardan çıkardıklarım, senin onayın gerekiyor: WhatsApp entegrasyonu resmî API değil, whatsapp-web.js üzerinden çalışıyor; WhatsApp arayüzünü değiştirdiğinde bozulabilir ve otomasyon nedeniyle hesap kısıtlaması riski var. Kurulum paketi 429 MB, çünkü Electron ve Puppeteer kendi Chromium'unu taşıyor. Yalnızca Windows için paketlenmiş. Veriler kullanıcının kendi bilgisayarında tutuluyor; çok kullanıcılı senkronizasyon yok. Arayüzün tamamı tek bir 252 KB'lık bileşen dosyasında — çalışıyor ama bakımı zor, bölmek gerekiyor. Uygulama TC kimlik numarası gibi kişisel veri tutuyor, bu da yedekleme ve paylaşımda dikkat gerektiriyor."
+---
+
+> **Bu sayfa taslak.** İçeriği depodaki README, `package.json` ve yayınlanmış
+> sürümlerden çıkardım — yani doğrulanabilir bilgiler. Ama proje senin;
+> okuyup düzeltmeden yayına almıyorum. Özellikle **"Sınırlar"** bölümü senin
+> sözlerinle yazılmalı.
+
+## Problem
+
+Ay sonunda yüzlerce personelin maaş bordrosunu imzalatmak, kimin imzaladığını
+takip etmek ve eksikleri kovalamak elle yürüyen bir süreç. Kâğıt listede
+işaretleme, sonra tek tek arayıp "bordronu imzalamaya gel" deme.
+
+İki ayrı zorluk var: **durumu görmek** ve **eksikleri hatırlatmak.**
+
+## Yaklaşım
+
+### Masaüstü uygulaması, web değil
+
+React + Electron ile `.exe` olarak paketlendi. Sebebi basit: veri şantiye
+bilgisayarında kalıyor, sunucu kurulumu gerekmiyor, internet olmadan da açılıyor.
+
+### WhatsApp ile hatırlatma
+
+İmzası eksik personele tek tıkla WhatsApp'tan bildirim gidiyor. Her gönderim
+"Aktivite Kayıtları"na işleniyor — kimin ne zaman uyarıldığı kayıt altında.
+
+Bu, uygulamanın en çok zaman kazandıran parçası: arama listesi tutmak yerine
+listeden seçip gönderiyorsun.
+
+### Hata önleyen mantık
+
+- **Tarih aralığı kilidi:** Personelin işe giriş/çıkış tarihine göre, çalışmadığı
+  ayların imza kutuları otomatik kilitleniyor. Olmayan bir ay için imza beklenmiyor.
+- **Dönem vurgulama:** İçinde bulunulan aya göre imzalanması gereken önceki ayın
+  sütunu görsel olarak öne çıkarılıyor.
+
+### Veri giriş ve çıkışı
+
+Excel ve JSON ile içe/dışa aktarma, departmana göre sıralı PDF personel listesi.
+Uygulama kapalı bir kutu değil — veriyi istediğin an dışarı alabiliyorsun.
+
+### Kendini güncelleyen kurulum
+
+`electron-updater` ile GitHub sürümleri takip ediliyor. Yeni sürüm çıktığında
+uygulama açılışta fark edip kullanıcıya bildiriyor. Şantiyedeki bilgisayara
+tekrar tekrar kurulum yapmaya gerek kalmıyor.
+
+## Sonuç
+
+Üç sürüm yayınlandı, sonuncusu **v1.2.0** (Ekim 2025). Windows kurulum paketi
+GitHub üzerinden indirilebiliyor.
+
+**Kazandırdığı süre ölçülmedi.** İmza takibinin elle ne kadar sürdüğünü
+kronometreyle tutmadım; tahmin yazmıyorum.
+
+## Ne öğrendim
+
+**Masaüstü uygulaması dağıtmak, yazmaktan zor.** Kod çalıştıktan sonra asıl iş
+başlıyor: paketleme, imzalama, güncelleme altyapısı. `electron-updater` kurmak,
+uygulamayı yazmanın yanında küçük ama etkisi büyük oldu.
+
+**Resmî olmayan entegrasyon, borç alınmış zamandır.** WhatsApp entegrasyonu
+bugün çalışıyor ama garantisi yok. Bunu bilerek kullanmakla, bilmeden kullanmak
+arasında fark var.
+
+**Tek dosya büyüyor.** Arayüzün tamamı tek bir bileşende toplandı ve 252 KB'a
+ulaştı. Çalışıyor ama üzerine bir şey eklemek her seferinde zorlaşıyor.

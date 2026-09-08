@@ -7,7 +7,7 @@ import { SITE } from '../../consts.mjs';
 import { tarihTR, boyutFormat, DURUM_ETIKET, sayacBilgisi } from '../../lib/utils';
 
 export async function getStaticPaths() {
-  const projeler = await getCollection('projeler');
+  const projeler = await getCollection('projeler', ({ data }) => !data.taslak);
   return projeler.map((proje) => ({ params: { slug: proje.id }, props: { proje } }));
 }
 

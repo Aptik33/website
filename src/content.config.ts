@@ -16,6 +16,9 @@ const projeler = defineCollection({
     repoUrl: z.string().url().optional(),
     demoUrl: z.string().url().optional(),
     oneCikan: z.boolean().default(false),
+    // Yazılardaki gibi: true ise proje sitede görünmez. Hazırlanan ama
+    // onaylanmamış proje sayfaları için.
+    taslak: z.boolean().default(false),
     metrikler: z
       .array(z.object({ etiket: z.string(), deger: z.string() }))
       .max(4)

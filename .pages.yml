@@ -105,7 +105,7 @@ content:
       primary: baslik
       sort: [tarih, baslik]
       order: desc
-      fields: [baslik, kategori, durum, tarih]
+      fields: [baslik, kategori, durum, tarih, taslak]
     fields:
       - name: baslik
         label: Proje adı
@@ -170,6 +170,12 @@ content:
         label: Anasayfada öne çıkar
         type: boolean
         default: false
+
+      - name: taslak
+        label: Taslak (yayınlama)
+        type: boolean
+        default: false
+        description: Açık bırakırsan proje sitede görünmez.
 
       - name: metrikler
         label: Metrikler

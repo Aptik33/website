@@ -5,7 +5,7 @@ import SayfaBasligi from '../../components/SayfaBasligi.astro';
 import ProjeKart from '../../components/ProjeKart.astro';
 import { KATEGORILER } from '../../consts.mjs';
 
-const projeler = (await getCollection('projeler')).sort(
+const projeler = (await getCollection('projeler', ({ data }) => !data.taslak)).sort(
   (a, b) => b.data.tarih.valueOf() - a.data.tarih.valueOf()
 );
 
